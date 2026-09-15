@@ -64,6 +64,30 @@ Aucune interruption de service, hormis quelques secondes pendant la recréation 
   indiquant qu'aucun service n'est disponible, et son enregistrement DNS est conservé. Coolify
   répond, et les accès fermés à l'étape 1 le restent.
 
+### Étape 3 — mises à jour du système et de Docker, redémarrage
+
+- **Mises à jour** : rafraîchi la liste des paquets, qui en comptait davantage qu'à l'inventaire, tous
+  des mises à jour ordinaires d'Ubuntu et de Docker. Installé tout ce qui était en attente, en
+  conservant les fichiers de configuration locaux, sans erreur. Le démon Docker a redémarré pendant
+  sa mise à jour : les conteneurs de Coolify sont revenus sains en une vingtaine de secondes, et les
+  règles de pare-feu des conteneurs ont tenu.
+- **Redémarrage** : le serveur a redémarré pour charger le nouveau noyau, et il était de retour en une
+  trentaine de secondes.
+- **Sur le serveur, après le redémarrage** :
+  - nouveau noyau chargé, aucun service en échec ;
+  - réseau opérationnel en IPv4 et IPv6 ;
+  - conteneurs de Coolify sains ;
+  - pare-feu et règles des conteneurs rechargés depuis leur configuration, ce qui prouve leur
+    persistance ;
+  - fail2ban actif, configuration SSH et verrouillage du compte de service conservés.
+- **Depuis l'extérieur** : seuls les accès attendus répondent. Coolify répond, et les domaines non
+  routés renvoient la réponse par défaut du proxy.
+- **Fausse alerte écartée** : un contrôle a d'abord affiché zéro règle de pare-feu. C'était une erreur
+  de filtre sur le format de sortie, écartée par une lecture détaillée.
+
+Interruption de service : une vingtaine de secondes au redémarrage de Docker, puis une trentaine au
+redémarrage du serveur.
+
 ## Décisions
 
 Arbitrages validés en séance :
@@ -104,7 +128,7 @@ Arbitrages validés en séance :
 
 ## Points ouverts
 
-- Étapes 3 à 8 du plan à mener, puis à consigner dans cette entrée.
+- Étapes 4 à 8 du plan à mener, puis à consigner dans cette entrée.
 - Aucun jeton d'API Coolify n'existe plus : celui du dashboard reste à créer par Lucas.
 - Chiffrer le coût des sauvegardes hors serveur.
 - Vérifier l'IPv6 entrante depuis un poste IPv6.
