@@ -106,6 +106,32 @@ redémarrage du serveur.
 - **Clé de chiffrement** : la mise à jour a modifié le fichier de configuration de Coolify, mais sa
   clé de chiffrement est restée la même. La sauvegarde reste donc restaurable.
 
+### Étape 5 — swap, mises à jour automatiques, droits d'un fichier sensible
+
+- **Swap** : ajouté un swap, déclaré pour tenir au redémarrage. La configuration des montages a été
+  vérifiée sans erreur.
+- **Mises à jour de sécurité automatiques** : vérifié qu'elles sont actives et réellement appliquées
+  depuis plusieurs semaines. Rien n'était à activer.
+- **Redémarrage automatique** : mis en place la nuit, à heure fixe de Paris, et seulement quand une
+  mise à jour l'exige.
+  - Le serveur reste en temps universel. Le réglage natif aurait suivi ce fuseau et se serait décalé
+    d'une heure au changement d'heure : une minuterie système dédiée s'en charge.
+  - Le cas « non requis » a été testé : aucun redémarrage.
+- **Droits du fichier de configuration sensible de Coolify** : lu d'abord ses scripts d'installation et
+  de mise à jour, puis aligné les droits du fichier et de ses copies sur la convention de Coolify.
+  Cette convention est au moins aussi sûre que celle envisagée au départ.
+- **Mise à l'épreuve, par des redémarrages de Coolify** :
+  - La première a déclenché le retour arrière prévu. Un contrôle trop précoce n'avait pas trouvé les
+    tâches d'arrière-plan, encore en démarrage.
+  - Après diagnostic, la seconde, avec une attente correcte, a réussi : services sains, tâches
+    d'arrière-plan relancées, configuration rechargée, aucune erreur.
+- **Consigne** : la mise à jour de Coolify réécrit ce fichier. Ses droits sont donc à revérifier après
+  chaque mise à jour, et la consigne est notée dans l'archive privée.
+- **Depuis l'extérieur** : seuls les accès attendus répondent, et Coolify répond.
+
+Interruption de service : l'interface de Coolify a été indisponible une vingtaine de secondes à chacun
+des trois redémarrages.
+
 ## Décisions
 
 Arbitrages validés en séance :
@@ -146,7 +172,7 @@ Arbitrages validés en séance :
 
 ## Points ouverts
 
-- Étapes 5 à 8 du plan à mener, puis à consigner dans cette entrée.
+- Étapes 6 à 8 du plan à mener, puis à consigner dans cette entrée.
 - Aucun jeton d'API Coolify n'existe plus : celui du dashboard reste à créer par Lucas.
 - Chiffrer le coût des sauvegardes hors serveur.
 - Vérifier l'IPv6 entrante depuis un poste IPv6.
