@@ -54,7 +54,8 @@ une fiche.
 
 ### Ce qu'il expose
 
-- Une **interface web**, à monitoring.cairn-wms.fr, réservée au compte GitHub `LucasLH1`.
+- Une **interface web**, à monitoring.cairn-wms.fr, réservée au compte GitHub `LucasLH1` — sous
+  réserve d'un écart temporaire, jusqu'à la livraison de la tranche 1b (principe 4).
 - Un **connecteur MCP distant**, protégé par OAuth, pour Claude Chat et Cowork.
 - Les points d'entrée des **webhooks GitHub** et des **hooks Claude Code**, authentifiés par leur
   secret.
@@ -106,6 +107,17 @@ Les secrets de déploiement suivent la même règle, dans les environnements Git
 À l'exception de `/version` et `/health`, rien de ce que le dashboard montre ou permet n'est
 accessible sans authentification : l'interface exige une connexion GitHub au compte `LucasLH1`, le
 connecteur une autorisation OAuth, les webhooks et les hooks leur secret.
+
+Le compte autorisé est reconnu par son **identifiant numérique GitHub**, et uniquement par lui : un
+login peut être renommé, puis repris par un autre compte. Le login ne sert qu'à l'affichage.
+
+> **Écart temporaire — de la livraison de la tranche 1a à celle de la tranche 1b.**
+> La tranche 1a met le dashboard en ligne avant que la connexion existe : sa page d'accueil est
+> publique. L'écart est accepté à une condition : cette page est un **gabarit statique**, sans
+> aucune donnée et sans aucun appel à GitHub. **Il prend fin à la livraison de la tranche 1b**, qui
+> soumet la page d'accueil à la connexion et retire cet encadré du cadrage.
+>
+> Accepté le 2026-09-15.
 
 ### 5. Une tranche à la fois, en découpage vertical
 
