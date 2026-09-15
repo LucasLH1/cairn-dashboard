@@ -1,0 +1,69 @@
+# --- Environnement ---
+.env
+.env.*
+!.env.example
+*.local
+secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+
+# --- Node ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm/
+.pnpm-store/
+.yarn/*
+!.yarn/releases
+coverage/
+
+# --- Nuxt et Nitro ---
+.nuxt/
+.output/
+.nitro/
+.data/
+dist/
+
+# --- SQLite ---
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.sqlite-journal
+*-wal
+*-shm
+
+# --- Systèmes de fichiers ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# --- Éditeurs et IDE ---
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.iml
+*.swp
+*.swo
+*~
+.\#*
+\#*\#
+.project
+.settings/
+*.sublime-workspace
+
+# --- Sorties et temporaires ---
+*.log
+tmp/
+temp/
+.cache/
