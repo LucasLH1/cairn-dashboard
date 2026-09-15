@@ -49,6 +49,21 @@ Coolify ne devait pas être réinstallé.
 
 Aucune interruption de service, hormis quelques secondes pendant la recréation du proxy.
 
+### Étape 2 — retrait de l'ancien staging
+
+- **Côté Lucas** : dépôt de l'ancien Cairn archivé sur GitHub ; dans Coolify, application, base et
+  environnement du staging supprimés ; ancien jeton d'API révoqué.
+- **Sur le serveur** : vérifié qu'il ne reste rien du staging, ni conteneur, ni volume, ni image, ni
+  dossier de configuration, ni trace dans le proxy. Aucun élément n'a survécu à la suppression faite
+  dans Coolify.
+- **Dans Coolify** : plus aucune application, aucun service, aucun projet, aucun jeton d'API, aucun
+  rattachement orphelin. Seule demeure la sauvegarde planifiée de sa propre base.
+- **Ancienne génération de la base de staging** : supprimée, sans sauvegarde, comme décidé. Elle était
+  déjà orpheline avant la suppression.
+- **Depuis l'extérieur** : staging.cairn-wms.fr ne sert plus l'ancienne application, le proxy
+  indiquant qu'aucun service n'est disponible, et son enregistrement DNS est conservé. Coolify
+  répond, et les accès fermés à l'étape 1 le restent.
+
 ## Décisions
 
 Arbitrages validés en séance :
@@ -89,7 +104,7 @@ Arbitrages validés en séance :
 
 ## Points ouverts
 
-- Étapes 2 à 8 du plan à mener, puis à consigner dans cette entrée.
-- Archiver l'ancien dépôt de Cairn sur GitHub.
+- Étapes 3 à 8 du plan à mener, puis à consigner dans cette entrée.
+- Aucun jeton d'API Coolify n'existe plus : celui du dashboard reste à créer par Lucas.
 - Chiffrer le coût des sauvegardes hors serveur.
 - Vérifier l'IPv6 entrante depuis un poste IPv6.
