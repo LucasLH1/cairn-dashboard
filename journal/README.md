@@ -38,7 +38,7 @@ corps.
 ---
 date: 2026-09-15 22:16
 objectif: Structurer le dépôt du dashboard, sans code applicatif.
-tranches: [1, 5]
+tranches: ["1a", "5"]
 issues: [1, 5]
 ---
 ```
@@ -47,8 +47,11 @@ issues: [1, 5]
 |---|---|
 | `date` | Date et heure de début, au format `AAAA-MM-JJ HH:MM`. Cohérente avec le nom du fichier. |
 | `objectif` | L'intention de la session **en une ligne**. La section « Objectif » la développe. |
-| `tranches` | Les numéros des tranches touchées, tels qu'ils figurent dans `status.yml` : `[2, 3]`. Liste vide `[]` si la session n'a touché aucune tranche. |
-| `issues` | Les numéros d'issue GitHub concernés : `[2, 3]`. Liste vide `[]` si aucune. |
+| `tranches` | Les identifiants des tranches touchées, tels qu'ils figurent dans `status.yml` : `["1b", "2"]`. Liste vide `[]` si la session n'a touché aucune tranche. |
+| `issues` | Les numéros d'issue GitHub concernés : `[9, 2]`. Liste vide `[]` si aucune. |
+
+Les identifiants de tranche sont **entre guillemets** — `1a` n'est pas un nombre, et `2` doit garder
+la même forme que lui.
 
 ## Format d'une entrée
 

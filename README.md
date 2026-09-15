@@ -10,7 +10,7 @@ Le dashboard ne possède presque aucune donnée : **il lit et écrit dans GitHub
 source de vérité ; le dashboard n'en est qu'une interface.
 
 Ce dépôt est **public**. À ce stade, il ne contient aucun code applicatif : la pile est actée dans
-`docs/decisions/`, la réalisation commence avec la tranche 1.
+`docs/decisions/`, la réalisation commence avec la tranche 1a.
 
 ## Structure du dépôt
 
@@ -19,14 +19,16 @@ Ce dépôt est **public**. À ce stade, il ne contient aucun code applicatif : l
 | `docs/cadrage.md` | Finalité, périmètre et principes du dashboard. |
 | `docs/deploiement.md` | Logique d'intégration et de déploiement, indépendante de toute pile. |
 | `docs/decisions/` | Les décisions engageantes, une fiche par décision. |
+| `design/` | Le design de référence, exporté de Claude Design. Une référence visuelle, pas du code applicatif. |
 | `journal/` | Une entrée par session de travail : ce qui a été fait, décidé, touché. |
 | `status.yml` | L'état d'avancement de chaque tranche. |
 | `CLAUDE.md` | Les règles de travail dans ce dépôt. |
 
 ## Avancement
 
-Huit tranches, livrées l'une après l'autre en découpage vertical : chacune est utilisable de bout en
-bout avant que la suivante commence. L'état de chacune se lit dans `status.yml`.
+Le dashboard se livre par tranches, l'une après l'autre, en découpage vertical : chacune est
+utilisable de bout en bout, en ligne, avant que la suivante commence. Leur liste, leur ordre et leur
+état se lisent dans `status.yml`.
 
 ## Mise en service
 

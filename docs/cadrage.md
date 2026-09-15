@@ -109,6 +109,6 @@ connecteur une autorisation OAuth, les webhooks et les hooks leur secret.
 
 ### 5. Une tranche à la fois, en découpage vertical
 
-Le dashboard se construit en huit tranches, livrées dans l'ordre de `status.yml`. Chacune traverse
+Le dashboard se construit par tranches, livrées dans l'ordre de `status.yml`. Chacune traverse
 toutes les couches — interface, serveur, GitHub, données, mise en service — et est utilisable de
 bout en bout, en production, avant que la suivante commence.

@@ -3,9 +3,9 @@
 # Source unique du découpage en tranches. L'état d'une tranche ne reflète que
 # ce qui existe réellement, dans le dépôt et en production. Rien n'est extrapolé.
 #
-# Les tranches se livrent dans l'ordre, une à la fois, en découpage vertical :
-# chacune est utilisable de bout en bout avant que la suivante commence
-# (CLAUDE.md, règle 6).
+# Les tranches se livrent dans l'ordre de ce fichier, une à la fois, en
+# découpage vertical : chacune est utilisable de bout en bout, en ligne, avant
+# que la suivante commence (CLAUDE.md, règle 6).
 #
 # États possibles, dans l'ordre du cycle de vie :
 #
@@ -17,8 +17,10 @@
 # Aucune tranche n'est aujourd'hui « en développement » ni « livré » : le dépôt
 # ne contient aucun code applicatif.
 #
-# Le champ « issue » renvoie à l'issue GitHub qui porte la tranche ; le champ
-# « label », au label GitHub qui la marque.
+# Les identifiants sont des chaînes, entre guillemets : « 1a » n'est pas un
+# nombre, et toutes les tranches gardent la même forme. Le champ « issue »
+# renvoie à l'issue GitHub qui porte la tranche ; le champ « label », au label
+# GitHub qui la marque.
 #
 # À tenir à jour à chaque session, en même temps que journal/ et les issues.
 
@@ -27,49 +29,55 @@ mis_a_jour_le: 2026-09-15
 
 tranches:
 
-  - id: 1
-    nom: Squelette Nuxt, connexion GitHub restreinte, mise en ligne sur le VPS
+  - id: "1a"
+    nom: Squelette Nuxt, thème et composants du design, CI, mise en ligne
     etat: à faire
     issue: 1
-    label: tranche/1-squelette
+    label: tranche/1a-squelette
 
-  - id: 2
+  - id: "1b"
+    nom: Connexion GitHub restreinte au compte LucasLH1
+    etat: à faire
+    issue: 9
+    label: tranche/1b-connexion-github
+
+  - id: "2"
     nom: Consultation de la doc de cairn-wms
     etat: à faire
     issue: 2
     label: tranche/2-doc
 
-  - id: 3
+  - id: "3"
     nom: Avancement à partir du status.yml de cairn-wms
     etat: à faire
     issue: 3
     label: tranche/3-avancement
 
-  - id: 4
+  - id: "4"
     nom: "Tickets : liste, filtres, création"
     etat: à faire
     issue: 4
     label: tranche/4-tickets
 
-  - id: 5
+  - id: "5"
     nom: Journal et fil d'activité en direct (webhooks GitHub)
     etat: à faire
     issue: 5
     label: tranche/5-fil-activite
 
-  - id: 6
+  - id: "6"
     nom: Événements des hooks Claude Code dans le fil en direct
     etat: à faire
     issue: 6
     label: tranche/6-hooks-claude-code
 
-  - id: 7
+  - id: "7"
     nom: Connecteur MCP avec OAuth
     etat: à faire
     issue: 7
     label: tranche/7-connecteur-mcp
 
-  - id: 8
+  - id: "8"
     nom: Déploiements de cairn-wms vers staging et prod
     etat: à faire
     issue: 8
