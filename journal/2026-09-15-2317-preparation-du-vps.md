@@ -88,6 +88,24 @@ Aucune interruption de service, hormis quelques secondes pendant la recréation 
 Interruption de service : une vingtaine de secondes au redémarrage de Docker, puis une trentaine au
 redémarrage du serveur.
 
+### Étape 4 — sauvegarde de Coolify, puis mise à jour
+
+- **Sauvegarde** : sauvegardé la base de Coolify ainsi que son fichier de configuration, qui porte sa
+  clé de chiffrement, et copié les deux sur le poste de travail, dans un dossier réservé, hors de tout
+  dépôt. Leur contenu n'a jamais été affiché.
+- **Intégrité** : les empreintes sont identiques entre le serveur et le poste ; la table des matières
+  est relue et la sauvegarde lue en entier, sans erreur, sur les deux exemplaires. Une première
+  relecture s'est interrompue sur une erreur technique du script, et elle a été refaite.
+- **Mise à jour** : lancée par Lucas depuis l'interface de Coolify.
+- **Sur le serveur, après la mise à jour** :
+  - services de Coolify sains et à la version attendue ;
+  - aucune erreur dans le journal de mise à jour, aucune migration en attente, réponse de santé
+    correcte ;
+  - configuration du proxy inchangée, pare-feu intact, mise à jour automatique toujours désactivée.
+- **Depuis l'extérieur** : seuls les accès attendus répondent.
+- **Clé de chiffrement** : la mise à jour a modifié le fichier de configuration de Coolify, mais sa
+  clé de chiffrement est restée la même. La sauvegarde reste donc restaurable.
+
 ## Décisions
 
 Arbitrages validés en séance :
@@ -128,7 +146,7 @@ Arbitrages validés en séance :
 
 ## Points ouverts
 
-- Étapes 4 à 8 du plan à mener, puis à consigner dans cette entrée.
+- Étapes 5 à 8 du plan à mener, puis à consigner dans cette entrée.
 - Aucun jeton d'API Coolify n'existe plus : celui du dashboard reste à créer par Lucas.
 - Chiffrer le coût des sauvegardes hors serveur.
 - Vérifier l'IPv6 entrante depuis un poste IPv6.
