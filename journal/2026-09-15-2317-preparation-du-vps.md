@@ -132,6 +132,21 @@ redémarrage du serveur.
 Interruption de service : l'interface de Coolify a été indisponible une vingtaine de secondes à chacun
 des trois redémarrages.
 
+### Étape 6 — suppression du compte de service inutilisé
+
+- **Avant la suppression** : vérifié que le compte n'avait ni processus, ni session, ni tâche
+  planifiée, ni droit d'administration, ni fichier hors de son dossier personnel.
+- **Suppression** : supprimé le compte et son dossier personnel, sans sauvegarde, comme décidé.
+- **Après la suppression** : il ne reste de lui ni compte, ni groupe, ni dossier, ni processus, ni
+  tâche planifiée, ni aucun fichier sur le système. Les seuls fichiers portant le même identifiant
+  numérique sont dans les images de conteneurs : ils leur appartiennent et n'ont pas de lien avec ce
+  compte.
+- **SSH** : la configuration est valide et une nouvelle connexion est acceptée. La protection contre
+  les tentatives répétées est active et a déjà écarté une adresse, qui n'est pas celle de
+  l'administration.
+- **Coolify** : services sains, tâches d'arrière-plan en marche, serveur joignable.
+- **Depuis l'extérieur** : seuls les accès attendus répondent.
+
 ## Décisions
 
 Arbitrages validés en séance :
@@ -172,7 +187,7 @@ Arbitrages validés en séance :
 
 ## Points ouverts
 
-- Étapes 6 à 8 du plan à mener, puis à consigner dans cette entrée.
+- Étapes 7 et 8 du plan à mener, puis à consigner dans cette entrée.
 - Aucun jeton d'API Coolify n'existe plus : celui du dashboard reste à créer par Lucas.
 - Chiffrer le coût des sauvegardes hors serveur.
 - Vérifier l'IPv6 entrante depuis un poste IPv6.
