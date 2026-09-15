@@ -147,6 +147,25 @@ des trois redémarrages.
 - **Coolify** : services sains, tâches d'arrière-plan en marche, serveur joignable.
 - **Depuis l'extérieur** : seuls les accès attendus répondent.
 
+### Étape 7 — connexion d'administration système réservée aux réseaux internes
+
+- **Ce qui change** : la connexion du compte d'administration du système par SSH n'est plus acceptée
+  que depuis la machine elle-même et depuis les réseaux internes des conteneurs, par lesquels Coolify
+  joint le serveur. Partout ailleurs, elle est refusée. La clé reste exigée dans tous les cas.
+- **Plages plutôt qu'adresses** : les adresses des conteneurs changent à leur redémarrage, ce que le
+  journal confirmait. Les réserves d'adresses internes sont donc autorisées dans leur ensemble, et non
+  les adresses du moment. Elles ne sont pas joignables depuis Internet.
+- **Vérifié avant rechargement** : la configuration est valide, et une simulation sur dix cas donne le
+  refus attendu partout ailleurs, l'acceptation attendue depuis les réseaux internes, et aucune option
+  débordant du bloc conditionnel. Une restauration automatique était prête en cas d'écart.
+- **Vérifié après rechargement** :
+  - une connexion neuve, empruntant le chemin réel de Coolify, est acceptée ;
+  - l'accès d'administration habituel depuis l'extérieur fonctionne toujours ;
+  - Lucas a lancé la validation du serveur dans Coolify : elle a réussi, et le journal montre qu'elle
+    s'est authentifiée à nouveau, sans réutiliser une connexion déjà ouverte ;
+  - aucun refus n'est apparu, Coolify reste joignable et sain, et depuis l'extérieur seuls les accès
+    attendus répondent.
+
 ## Décisions
 
 Arbitrages validés en séance :
@@ -187,7 +206,7 @@ Arbitrages validés en séance :
 
 ## Points ouverts
 
-- Étapes 7 et 8 du plan à mener, puis à consigner dans cette entrée.
+- Étape 8 du plan à mener, puis à consigner dans cette entrée.
 - Aucun jeton d'API Coolify n'existe plus : celui du dashboard reste à créer par Lucas.
 - Chiffrer le coût des sauvegardes hors serveur.
 - Vérifier l'IPv6 entrante depuis un poste IPv6.
