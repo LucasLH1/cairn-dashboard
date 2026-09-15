@@ -12,3 +12,6 @@
 *.sqlite  binary
 *.sqlite3 binary
 *.db      binary
+
+# Design de référence : export généré, exclu des diffs et des statistiques de langage.
+design/*.html -diff linguist-generated
