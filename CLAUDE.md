@@ -16,7 +16,8 @@ Avant toute action — réponse, proposition, modification, création de fichier
   qu'il a le droit d'écrire, et où ;
 - `docs/decisions/` : les décisions engageantes déjà prises, et leur statut ;
 - `status.yml` : la tranche en cours, et ce qu'elle doit rendre utilisable ;
-- `docs/deploiement.md`, dès qu'on touche à l'intégration, à l'image ou à la mise en service.
+- `docs/deploiement.md`, dès qu'on touche à l'intégration, à l'image ou à la mise en service ;
+- `design/`, dès qu'on touche à l'interface (règle 7).
 
 **cairn-wms est la source de vérité, le dashboard n'en est qu'une interface.** Ce que le dashboard
 lit de cairn-wms — documentation, `status.yml`, journal, issues, labels — se lit tel qu'il est dans
@@ -97,8 +98,8 @@ OAuth, les secrets des webhooks GitHub et des hooks Claude Code, et le jeton Coo
 
 ## 6. Livrer tranche par tranche, en découpage vertical
 
-Le dashboard se construit en huit tranches, listées dans `status.yml` et portées chacune par une
-issue.
+Le dashboard se construit par tranches, listées dans `status.yml` dans leur ordre de livraison et
+portées chacune par une issue.
 
 - **Une tranche à la fois, dans l'ordre.** On ne commence pas la suivante tant que la précédente
   n'est pas livrée.
@@ -109,3 +110,19 @@ issue.
   « ça marche en local ».
 - Ce qui ne relève pas de la tranche en cours ne s'anticipe pas dans le code : il se note dans
   l'issue de la tranche concernée.
+
+## 7. Suivre le design
+
+Le design de référence est l'export Claude Design rangé dans `design/` (voir `design/README.md`).
+C'est une **référence**, pas du code applicatif : on n'en recopie pas le code, on en reprend les
+choix visuels.
+
+- **Imposés** : les couleurs, les polices, les espacements et les composants du design. On les
+  reprend tels quels — ni approximation, ni variante voisine, ni « amélioration ».
+- **Indicative** : la mise en page des maquettes. Elle montre une intention, pas un plan à suivre au
+  pixel.
+- **Tout écart se justifie et se signale.** Il se justifie par les données réelles ou par l'usage,
+  et se signale dans l'entrée de journal de la session, avec sa raison.
+- **Un composant absent du design se construit avec les mêmes briques visuelles** : ses couleurs,
+  ses polices, ses espacements, ses composants existants. Pas de couleur, de police ni de taille
+  inventée pour l'occasion.
