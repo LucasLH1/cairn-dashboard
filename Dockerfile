@@ -28,7 +28,11 @@ COPY --from=build /app/.output ./.output
 USER node
 EXPOSE 3000
 
+# Le contrôle de santé du conteneur vise /live, qui ne dépend de rien d'extérieur.
+# Surtout pas /health : depuis la tranche 3, celui-ci éprouve une lecture réelle
+# chez GitHub et passe à 503 si GitHub est indisponible. Le conteneur, lui, va
+# bien — une panne GitHub ne doit pas devenir une panne d'hébergement.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD node -e "fetch('http://127.0.0.1:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+  CMD node -e "fetch('http://127.0.0.1:3000/live').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
 
 CMD ["node", ".output/server/index.mjs"]

@@ -58,7 +58,9 @@ une fiche.
 - Un **connecteur MCP distant**, protégé par OAuth, pour Claude Chat et Cowork.
 - Les points d'entrée des **webhooks GitHub** et des **hooks Claude Code**, authentifiés par leur
   secret.
-- Les routes **`/version` et `/health`**, publiques par contrat ([`docs/deploiement.md`](deploiement.md) §2).
+- Les routes **`/version`, `/health` et `/live`**, publiques par contrat
+  ([`docs/deploiement.md`](deploiement.md) §2 et §7). `/health` dit si le service est utilisable,
+  dépendances comprises ; `/live`, si le processus répond — et ne dépend de rien d'extérieur.
 
 ### Hors périmètre
 
@@ -103,14 +105,14 @@ Les secrets de déploiement suivent la même règle, dans les environnements Git
 
 ### 4. Rien d'accessible sans authentification
 
-À l'exception de `/version` et `/health`, rien de ce que le dashboard montre ou permet n'est
+À l'exception de `/version`, `/health` et `/live`, rien de ce que le dashboard montre ou permet n'est
 accessible sans authentification : l'interface exige une connexion GitHub au compte `LucasLH1`, le
 connecteur une autorisation OAuth, les webhooks et les hooks leur secret.
 
 Le compte autorisé est reconnu par son **identifiant numérique GitHub**, et uniquement par lui : un
 login peut être renommé, puis repris par un autre compte. Le login ne sert qu'à l'affichage.
 
-Répondent sans connexion, et rien d'autre : `/version` et `/health`, le parcours de connexion
+Répondent sans connexion, et rien d'autre : `/version`, `/health` et `/live`, le parcours de connexion
 (`/auth/…`, l'écran de connexion et celui de refus) et les ressources de l'interface — feuilles de
 style, polices, icône. Toute autre adresse exige une session ouverte ; une demande de données sans
 session est refusée, une page mène à la connexion.
