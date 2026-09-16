@@ -82,3 +82,23 @@ Les alternatives (Dokploy, très proche ; Kamal, sans interface ; Docker Compose
 - `/health` à 503 si la base SQLite est inaccessible ou si le jeton GitHub est refusé.
 - SQLite sur un **volume persistant** Coolify.
 - Cairn aura, lui, `staging` et `production`, déployés depuis le dashboard.
+
+## 6. Complément du 2026-09-16 — déclenchement du déploiement du dashboard
+
+*Ajouté après coup, en complément des sections 3 et 5. Ne remplace rien de ce qui précède.*
+
+Le dashboard n'ayant qu'un environnement — [`0003`](decisions/0003-dashboard-un-seul-environnement.md) —
+et son environnement GitHub `production` n'autorisant le déploiement que depuis `main`, un workflow
+déclenché par l'événement `pull_request` serait refusé : il s'exécute sur la référence de la pull
+request, pas sur `main`. D'où les règles suivantes, pour ce dépôt :
+
+- **`deploiement.yml` se déclenche sur `push` vers `main`** — c'est-à-dire à la fusion de la pull
+  request `dev` → `main` — **et par `workflow_dispatch`** sur `main`, avec un paramètre `sha`, pour
+  redéployer ou revenir à une version antérieure.
+- **Sur `push`, le SHA déployé est le second parent du commit de fusion**, c'est-à-dire la tête de
+  `dev`, dont l'image a été construite et éprouvée. Le commit de fusion lui-même n'a jamais d'image :
+  le déployer contredirait « construire une fois, promouvoir sans reconstruire » (§2).
+- **Si le commit poussé n'est pas un commit de fusion, le workflow échoue explicitement**, sans rien
+  déployer.
+- **Le dépôt n'autorise que « Create a merge commit »** : squash et rebase sont désactivés. Sans cela,
+  la fusion produirait un commit sans second parent, et la règle ci-dessus n'aurait plus de sens.

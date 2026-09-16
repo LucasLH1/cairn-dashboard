@@ -85,3 +85,22 @@ Décision validée en séance le 2026-09-15. Elle ne vaut que pour le dashboard 
 - **Ce qui la remettrait en cause** : une panne du dashboard qui empêcherait de déployer cairn-wms —
   aujourd'hui, `deploiement.yml` reste lançable à la main, sans lui (§3) ; ou d'autres personnes
   que le propriétaire du dépôt qui dépendraient du dashboard pour travailler.
+
+## Complément du 2026-09-16
+
+*Ce complément n'amende pas la décision ci-dessus : il précise comment elle se met en œuvre.*
+
+L'environnement GitHub `production` restreint le déploiement à la branche `main`. Un workflow
+déclenché par l'événement `pull_request` s'exécutant sur la référence de la pull request, il serait
+refusé par cette restriction. Le déclenchement retenu est donc :
+
+- `deploiement.yml` sur **`push` vers `main`** — la fusion de la pull request — et par
+  **`workflow_dispatch`** sur `main`, avec un paramètre `sha`, pour redéployer ou revenir en arrière ;
+- sur `push`, le SHA déployé est le **second parent du commit de fusion**, soit la tête de `dev`, dont
+  l'image existe ; le workflow **échoue explicitement** si le commit poussé n'est pas un commit de
+  fusion ;
+- le dépôt n'autorise que « Create a merge commit » — squash et rebase désactivés — sans quoi il n'y
+  aurait pas de second parent.
+
+Le principe reste celui de la décision : la pull request vers `main` tient lieu de validation, et le
+SHA déployé est celui qui a été construit et éprouvé, jamais le commit de fusion.
