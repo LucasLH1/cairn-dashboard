@@ -2,7 +2,10 @@
 # le SHA est reçu en argument de construction (APP_COMMIT) et inscrit dans l'image,
 # qui sert /version et /health.
 
-FROM node:22-alpine AS build
+# Version épinglée : conséquence de la fiche 0006. `node:sqlite` est expérimental
+# sous Node 22, donc son API peut changer dans une version mineure. Une étiquette
+# mouvante ferait basculer la base du dashboard sans que personne ne l'ait décidé.
+FROM node:22.23.2-alpine AS build
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -14,7 +17,7 @@ ARG APP_COMMIT=inconnu
 ENV APP_COMMIT=$APP_COMMIT
 RUN npm run build
 
-FROM node:22-alpine AS run
+FROM node:22.23.2-alpine AS run
 WORKDIR /app
 
 ARG APP_COMMIT=inconnu

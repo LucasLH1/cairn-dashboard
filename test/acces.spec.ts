@@ -7,6 +7,10 @@ describe('cheminPublic', () => {
     expect(cheminPublic('/health')).toBe(true)
   })
 
+  it('laisse passer la réception des webhooks, que GitHub appelle sans session', () => {
+    expect(cheminPublic('/webhooks/github')).toBe(true)
+  })
+
   it('laisse passer le contrôle de santé du conteneur', () => {
     // Sans cela, le contrôle exigerait une session : il échouerait toujours, et
     // le conteneur serait déclaré malade en permanence.

@@ -21,6 +21,12 @@ export default defineNuxtConfig({
     appCommit: '',
     sessionPassword: '',
     allowedGithubId: '',
+    // Historique des événements — fiches 0006 et 0007. Le fichier vit sur un
+    // volume persistant : sans lui, l'historique disparaîtrait à chaque
+    // redéploiement, et c'est la seule donnée que le dashboard ne peut pas
+    // relire ailleurs.
+    baseFichier: '',
+    webhookSecret: '',
     oauth: {
       github: {
         clientId: '',
@@ -31,6 +37,11 @@ export default defineNuxtConfig({
 
   nitro: {
     preset: 'node-server',
+    // Le fil en direct (tranche 5). La fiche 0001 a retenu Nuxt parce que Nitro
+    // offre le WebSocket nativement ; l'option qui l'active a été trouvée par
+    // l'expérience — construction, connexion réelle, aller-retour — et non dans
+    // une documentation.
+    experimental: { websocket: true },
   },
 
   app: {
