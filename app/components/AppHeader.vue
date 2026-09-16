@@ -1,10 +1,25 @@
+<script setup lang="ts">
+// Le login n'est affiché que pour dire qui est connecté : le contrôle d'accès,
+// lui, porte sur l'identifiant numérique du compte.
+const { data: moi } = await useFetch<{ login: string | null }>('/api/moi', {
+  default: () => ({ login: null }),
+})
+</script>
+
 <template>
   <header class="entete">
     <div class="titres">
       <h1>Cairn Dashboard</h1>
       <p class="sous-titre">Suivi du projet Cairn WMS</p>
     </div>
-    <ThemeToggle />
+
+    <div class="actions">
+      <span v-if="moi?.login" class="compte">{{ moi.login }}</span>
+      <ThemeToggle />
+      <form method="post" action="/auth/deconnexion">
+        <button type="submit" class="deconnexion">Se déconnecter</button>
+      </form>
+    </div>
   </header>
 </template>
 
@@ -32,12 +47,40 @@
   font-size: var(--fs-sm);
 }
 
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.compte {
+  padding: 3px var(--sp-3);
+  border-radius: var(--r-pill);
+  background: var(--c-tile);
+  color: var(--c-muted);
+  font-size: var(--fs-sm);
+}
+
+.deconnexion {
+  padding: 3px var(--sp-3);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--c-muted);
+  font-size: var(--fs-sm);
+}
+
+.deconnexion:hover {
+  color: var(--c-text);
+}
+
 @media (max-width: 640px) {
   .entete {
     padding: 0 var(--sp-4);
   }
 
-  .sous-titre {
+  .sous-titre,
+  .compte {
     display: none;
   }
 }

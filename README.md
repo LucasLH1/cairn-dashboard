@@ -46,6 +46,13 @@ docker compose build   # image, avec APP_COMMIT
 scripts/ci/smoke cairn-dashboard:local "$(git rev-parse HEAD)"
 ```
 
+## Accès
+
+L'interface est réservée à un seul compte GitHub, reconnu par son **identifiant numérique** : un
+login peut être renommé puis repris par un autre compte, il ne sert donc qu'à l'affichage. Toute
+page exige la connexion ; seules les routes du contrat de service, le parcours de connexion et les
+ressources de l'interface répondent sans session.
+
 ## Contrat de service
 
 | Route | Réponse |

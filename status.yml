@@ -31,13 +31,13 @@ tranches:
 
   - id: "1a"
     nom: Squelette Nuxt, thème et composants du design, CI, mise en ligne
-    etat: en développement
+    etat: livré
     issue: 1
     label: tranche/1a-squelette
 
   - id: "1b"
     nom: Connexion GitHub restreinte au compte LucasLH1
-    etat: à faire
+    etat: en développement
     issue: 9
     label: tranche/1b-connexion-github
 

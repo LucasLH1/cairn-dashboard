@@ -12,11 +12,21 @@ export default defineNuxtConfig({
   ],
 
   // Valeurs d'exécution. Les variables NUXT_* les remplacent au démarrage :
-  // NUXT_GITHUB_TOKEN, NUXT_GITHUB_REPO. APP_COMMIT est inscrit dans l'image.
+  // NUXT_GITHUB_TOKEN, NUXT_GITHUB_REPO, NUXT_SESSION_PASSWORD,
+  // NUXT_ALLOWED_GITHUB_ID, NUXT_OAUTH_GITHUB_CLIENT_ID et _SECRET.
+  // APP_COMMIT est inscrit dans l'image à sa construction.
   runtimeConfig: {
     githubToken: '',
     githubRepo: '',
     appCommit: '',
+    sessionPassword: '',
+    allowedGithubId: '',
+    oauth: {
+      github: {
+        clientId: '',
+        clientSecret: '',
+      },
+    },
   },
 
   nitro: {

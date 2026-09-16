@@ -4,6 +4,9 @@
 # puis 503 une fois une dépendance coupée. Un garde-fou qui ne refuse jamais
 # n'est pas prouvé.
 #
+# Depuis la tranche 1b, on éprouve aussi la porte : sans session, une page mène
+# à la connexion, et seules les routes publiques répondent.
+#
 #   scripts/ci/smoke <image> <sha>
 #
 # Variables attendues : NUXT_GITHUB_TOKEN, NUXT_GITHUB_REPO (cas nominal).
@@ -18,20 +21,52 @@ BASE="http://127.0.0.1:${PORT}"
 nettoyer() { docker rm -f "$NOM" >/dev/null 2>&1 || true; }
 trap nettoyer EXIT
 
-demarrer() { # $1 = jeton
+MDP_SESSION="$(head -c 48 /dev/urandom | base64 | tr -d '\n')"
+ID_AUTORISE=68059501
+
+demarrer() { # $1 = jeton de lecture
   nettoyer
   docker run -d --name "$NOM" -p "127.0.0.1:${PORT}:3000" \
     -e "NUXT_GITHUB_TOKEN=$1" \
     -e "NUXT_GITHUB_REPO=${NUXT_GITHUB_REPO:-}" \
+    -e "NUXT_SESSION_PASSWORD=${MDP_SESSION}" \
+    -e "NUXT_ALLOWED_GITHUB_ID=${ID_AUTORISE}" \
     "$IMAGE" >/dev/null
 }
 
-attendre() { # attend que le serveur réponde
+# Forge une session scellée comme le serveur le ferait, pour éprouver le
+# garde-fou : un sceau valide ne doit pas suffire à entrer.
+forger_session() { # $1 = identifiant numérique
+  MDP="$MDP_SESSION" ID="$1" node --input-type=module -e '
+    import { seal, defaults } from "iron-webcrypto"
+    import { webcrypto } from "node:crypto"
+    const id = Number(process.env.ID)
+    process.stdout.write(await seal(
+      webcrypto,
+      { id: `epreuve-${id}`, createdAt: Date.now(), data: { id, login: "compte-eprouve" } },
+      process.env.MDP,
+      { ...defaults, ttl: 12 * 3600 * 1000 },
+    ))
+  '
+}
+
+attendre() {
   for _ in $(seq 1 60); do
     if curl -sf -m 3 -o /dev/null "${BASE}/version"; then return 0; fi
     sleep 1
   done
   echo "le conteneur ne répond pas sur ${BASE}/version"; docker logs "$NOM" | tail -20; return 1
+}
+
+verifier_code() { # $1 = chemin, $2 = code attendu, $3 = libellé
+  local code
+  code=$(curl -s -o /tmp/smoke-corps -m 10 -w '%{http_code}' "${BASE}$1")
+  if [ "$code" != "$2" ]; then
+    echo "$3 : attendu $2, obtenu $code — $(head -c 200 /tmp/smoke-corps)"
+    docker logs "$NOM" | tail -20
+    exit 1
+  fi
+  echo "   $3 : $code"
 }
 
 echo "== démarrage de l'image avec un jeton valide"
@@ -44,15 +79,40 @@ if [ "$VU" != "$SHA" ]; then echo "attendu $SHA, obtenu '${VU}'"; exit 1; fi
 echo "   $VU"
 
 echo "== /health répond 200"
-CODE=$(curl -s -o /tmp/smoke-health -m 10 -w '%{http_code}' "${BASE}/health")
-if [ "$CODE" != "200" ]; then echo "attendu 200, obtenu $CODE : $(cat /tmp/smoke-health)"; docker logs "$NOM" | tail -20; exit 1; fi
-echo "   $(cat /tmp/smoke-health)"
+verifier_code /health 200 "/health"
+echo "   $(cat /tmp/smoke-corps)"
+
+echo "== sans session, la porte est fermée"
+verifier_code / 302 "page d'accueil"
+CIBLE=$(curl -s -o /dev/null -m 10 -w '%{redirect_url}' "${BASE}/")
+case "$CIBLE" in
+  */connexion) echo "   redirige vers $CIBLE" ;;
+  *) echo "la page d'accueil devrait mener à /connexion, elle mène à '${CIBLE}'"; exit 1 ;;
+esac
+verifier_code /connexion 200 "écran de connexion"
+verifier_code /api/moi 401 "route de données"
+verifier_code /auth/github 503 "connexion non configurée"
+
+echo "== un sceau valide ne suffit pas : l'identifiant est revérifié"
+SESSION_AUTRE="$(forger_session 999999)"
+SESSION_BONNE="$(forger_session "$ID_AUTORISE")"
+CODE=$(curl -s -o /dev/null -m 10 -b "cairn_session=${SESSION_AUTRE}" -w '%{http_code}' "${BASE}/")
+CIBLE=$(curl -s -o /dev/null -m 10 -b "cairn_session=${SESSION_AUTRE}" -w '%{redirect_url}' "${BASE}/")
+case "${CODE}:${CIBLE}" in
+  302:*/refus) echo "   session d'un autre identifiant : refusée vers ${CIBLE}" ;;
+  *) echo "une session scellée d'un autre identifiant a été acceptée (${CODE} ${CIBLE})"; exit 1 ;;
+esac
+CODE=$(curl -s -o /dev/null -m 10 -b "cairn_session=${SESSION_AUTRE}" -w '%{http_code}' "${BASE}/api/moi")
+if [ "$CODE" != "401" ]; then echo "route de données : attendu 401 pour un autre identifiant, obtenu $CODE"; exit 1; fi
+echo "   route de données : 401"
+CODE=$(curl -s -o /dev/null -m 10 -b "cairn_session=${SESSION_BONNE}" -w '%{http_code}' "${BASE}/")
+if [ "$CODE" != "200" ]; then echo "le compte autorisé devrait entrer, obtenu $CODE"; exit 1; fi
+echo "   session du compte autorisé : 200"
 
 echo "== dépendance coupée : /health répond 503"
 demarrer "jeton-invalide-pour-l-epreuve"
 attendre
-CODE=$(curl -s -o /tmp/smoke-health -m 10 -w '%{http_code}' "${BASE}/health")
-if [ "$CODE" != "503" ]; then echo "attendu 503, obtenu $CODE : $(cat /tmp/smoke-health)"; exit 1; fi
-echo "   $(cat /tmp/smoke-health)"
+verifier_code /health 503 "/health"
+echo "   $(cat /tmp/smoke-corps)"
 
 echo "== image éprouvée"
