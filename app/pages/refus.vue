@@ -4,27 +4,30 @@ useHead({ title: 'Cairn Dashboard — accès refusé' })
 </script>
 
 <template>
-  <main class="ecran">
+  <PanneauAcces>
     <section class="carte">
       <span class="marque" aria-hidden="true">✕</span>
-      <h1>Accès refusé</h1>
-      <p class="mention">
-        Ce compte GitHub n'est pas celui auquel ce site est réservé. Aucune session n'a été ouverte.
-      </p>
+
+      <div class="titres">
+        <h2>Accès refusé</h2>
+        <p class="mention">
+          Ce compte GitHub n'est pas celui auquel ce site est réservé.
+          Aucune session n'a été ouverte.
+        </p>
+      </div>
+
       <a class="bouton" href="/connexion">Revenir à la connexion</a>
+
+      <span class="filet" />
+
+      <p class="note">
+        Le compte autorisé est reconnu par son identifiant, jamais par son nom.
+      </p>
     </section>
-  </main>
+  </PanneauAcces>
 </template>
 
 <style scoped>
-.ecran {
-  display: grid;
-  place-items: center;
-  min-height: 100vh;
-  padding: var(--sp-frame);
-  background: var(--g-page);
-}
-
 .carte {
   display: flex;
   flex-direction: column;
@@ -52,6 +55,12 @@ useHead({ title: 'Cairn Dashboard — accès refusé' })
   font-size: var(--fs-lg);
 }
 
+.titres {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
 .mention {
   color: var(--c-muted);
   font-size: var(--fs-md);
@@ -67,5 +76,22 @@ useHead({ title: 'Cairn Dashboard — accès refusé' })
   color: var(--c-text);
   font-size: var(--fs-base);
   font-weight: 600;
+}
+
+.bouton:hover {
+  background: var(--c-card);
+  color: var(--c-text);
+}
+
+.filet {
+  width: 100%;
+  height: 1px;
+  margin-top: var(--sp-2);
+  background: var(--c-border);
+}
+
+.note {
+  color: var(--c-dim);
+  font-size: var(--fs-xs);
 }
 </style>

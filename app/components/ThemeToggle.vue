@@ -18,16 +18,11 @@ function appliquer(valeur: Theme) {
 }
 
 onMounted(() => {
-  let enregistre: string | null = null
-  try {
-    enregistre = localStorage.getItem('cairn-theme')
-  }
-  catch {
-    enregistre = null
-  }
-
-  if (enregistre === 'dark' || enregistre === 'light') {
-    appliquer(enregistre)
+  // Le thème enregistré est déjà posé par le plugin, sur toutes les pages :
+  // ici on ne fait que refléter l'état courant, sans le poser une seconde fois.
+  const pose = document.documentElement.dataset.theme
+  if (pose === 'dark' || pose === 'light') {
+    theme.value = pose
     return
   }
 

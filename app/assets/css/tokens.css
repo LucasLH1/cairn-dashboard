@@ -40,6 +40,10 @@
   --c-bascule: #2b2f34;
   --sh-bascule: none;
 
+  /* Bouton d'accent du design : son dégradé et son halo */
+  --g-accent: linear-gradient(150deg, #f4703f, #ef4f26);
+  --sh-accent: 0 14px 34px rgba(240, 86, 47, 0.3);
+
   /* Fond de page et ombre du cadre applicatif */
   --g-page: radial-gradient(900px 520px at 50% -10%, #1d1f22, #101113 60%, #0b0c0d);
   --sh-frame: 0 40px 90px rgba(0, 0, 0, 0.5);
