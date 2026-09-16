@@ -32,7 +32,10 @@ export default defineEventHandler(async (event) => {
 
   const requete = getQuery(event)
   const module = String(requete.module ?? '') || null
-  const issueDemandee = Number(requete.issue ?? Number.NaN)
+  // `Number('')` vaut 0, pas NaN : sans ce test, un filtre vide devient
+  // « issue 0 », qu'aucune entrée ne cite — et la liste se vide en silence.
+  const issueBrute = String(requete.issue ?? '').trim()
+  const issueDemandee = issueBrute === '' ? Number.NaN : Number(issueBrute)
   const issue = Number.isInteger(issueDemandee) ? issueDemandee : null
 
   try {

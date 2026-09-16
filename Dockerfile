@@ -28,6 +28,14 @@ ENV APP_COMMIT=$APP_COMMIT \
 
 COPY --from=build /app/.output ./.output
 
+# Emplacement des données, inscriptible par l'utilisateur du conteneur : le
+# répertoire de travail ne l'est pas, et la base n'aurait nulle part où
+# s'écrire. En production, le volume persistant est monté ici — sans quoi
+# l'historique disparaîtrait à chaque redéploiement (fiche 0007).
+RUN mkdir -p /data && chown node:node /data
+VOLUME /data
+ENV NUXT_BASE_FICHIER=/data/cairn.db
+
 USER node
 EXPOSE 3000
 
