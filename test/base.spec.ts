@@ -8,6 +8,7 @@ import {
   CONSERVATION_JOURS,
   derniers,
   enregistrer,
+  MIGRATIONS,
   migrer,
   ouvrir,
   purger,
@@ -19,6 +20,7 @@ function evenement(livraison: string, quand = '2026-09-16T12:00:00.000Z'): Evene
   return {
     livraison,
     source: 'github',
+    session: null,
     type: 'push',
     action: null,
     depot: 'LucasLH1/cairn-wms',
@@ -50,6 +52,56 @@ describe('les migrations', () => {
     enregistrer(db, evenement('a'))
     migrer(db)
     expect(compter(db)).toBe(1)
+  })
+
+  it('ajoutent la colonne de session, fiche 0009', () => {
+    const colonnes = (db.prepare('PRAGMA table_info(evenements)').all() as Array<{ name: string }>)
+      .map(c => String(c.name))
+    expect(colonnes).toContain('session')
+  })
+
+  it('préservent l\'historique d\'une base restée en version 1', () => {
+    // La preuve que l'ajout d'une colonne nullable ne réécrit rien : on bâtit
+    // une base au schéma de la version 1, on y écrit, puis on migre. C'est
+    // exactement ce que subira la base de production au déploiement.
+    const ancienne = ouvrir(':memory:')
+    ancienne.exec(MIGRATIONS[0]!.sql)
+    ancienne.exec(`
+      CREATE TABLE migrations (version INTEGER PRIMARY KEY, appliquee_le TEXT NOT NULL);
+      INSERT INTO migrations (version, appliquee_le) VALUES (1, '2026-09-16T10:00:00.000Z');
+      INSERT INTO evenements (livraison, source, type, recu_le, charge)
+        VALUES ('deja-la', 'github', 'push', '2026-09-16T10:00:00.000Z', '{}');
+    `)
+
+    expect(migrer(ancienne)).toBe(1)
+    expect(compter(ancienne)).toBe(1)
+    expect(derniers(ancienne, 1)[0]?.livraison).toBe('deja-la')
+    expect(derniers(ancienne, 1)[0]?.session).toBeNull()
+  })
+})
+
+describe('les événements de session', () => {
+  function session(livraison: string, id = 'session-1'): Evenement {
+    return { ...evenement(livraison), source: 'claude-code', session: id, type: 'PostToolUse' }
+  }
+
+  it('conservent leur session et la rendent à la lecture', () => {
+    enregistrer(db, session('cle-1'))
+    expect(derniers(db, 1)[0]?.session).toBe('session-1')
+  })
+
+  it('laissent la session nulle pour un événement GitHub', () => {
+    enregistrer(db, evenement('g1'))
+    expect(derniers(db, 1)[0]?.session).toBeNull()
+  })
+
+  it('n\'écartent pas deux événements distincts de la même session', () => {
+    // Le risque propre à cette source : les hooks ne renvoient jamais, donc une
+    // clé trop grossière ferait perdre un événement réel au lieu d'en écarter
+    // un faux (fiche 0009).
+    enregistrer(db, session('cle-1'))
+    enregistrer(db, session('cle-2'))
+    expect(compter(db)).toBe(2)
   })
 })
 

@@ -83,6 +83,9 @@ export default defineEventHandler(async (event) => {
   const enregistrement = enregistrer(obtenirBase(config), {
     livraison,
     source: 'github',
+    // Un webhook ne vient d'aucune session Claude Code : on le dit, plutôt que
+    // de laisser le champ se deviner (fiche 0009).
+    session: null,
     type,
     action: resume.action,
     depot: resume.depot,

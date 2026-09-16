@@ -21,6 +21,8 @@ export const CONSERVATION_JOURS = 365
 export interface Evenement {
   livraison: string
   source: string
+  /** Session Claude Code d'où vient l'événement. Nul pour GitHub (fiche 0009). */
+  session: string | null
   type: string
   action: string | null
   depot: string | null
@@ -42,7 +44,7 @@ export interface EvenementLu extends Evenement {
  * n'écrit donc jamais de code « première fois », qui serait le seul chemin
  * jamais éprouvé.
  */
-const MIGRATIONS: Array<{ version: number, sql: string }> = [
+export const MIGRATIONS: Array<{ version: number, sql: string }> = [
   {
     version: 1,
     sql: `
@@ -61,6 +63,17 @@ const MIGRATIONS: Array<{ version: number, sql: string }> = [
       );
       CREATE INDEX evenements_recents ON evenements (recu_le DESC);
       CREATE INDEX evenements_par_type ON evenements (type, recu_le DESC);
+    `,
+  },
+  {
+    // Fiche 0009 : les événements des sessions Claude Code se regroupent par
+    // session. La colonne reste nulle pour les événements GitHub, qui n'en ont
+    // pas — et une colonne ajoutée nullable ne réécrit aucune ligne : ce qui a
+    // déjà été reçu traverse la migration intact.
+    version: 2,
+    sql: `
+      ALTER TABLE evenements ADD COLUMN session TEXT;
+      CREATE INDEX evenements_par_session ON evenements (session, recu_le DESC);
     `,
   },
 ]
@@ -125,9 +138,9 @@ export function enregistrer(db: Base, e: Evenement): Enregistrement {
 
   try {
     db.prepare(`
-      INSERT INTO evenements (livraison, source, type, action, depot, auteur, titre, url, recu_le, charge)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(e.livraison, e.source, e.type, e.action, e.depot, e.auteur, e.titre, e.url, e.recuLe, e.charge)
+      INSERT INTO evenements (livraison, source, session, type, action, depot, auteur, titre, url, recu_le, charge)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(e.livraison, e.source, e.session, e.type, e.action, e.depot, e.auteur, e.titre, e.url, e.recuLe, e.charge)
     return 'enregistre'
   }
   catch (erreur) {
@@ -147,6 +160,7 @@ export function derniers(db: Base, limite = 50, type?: string | null): Evenement
     id: Number(l.id),
     livraison: String(l.livraison),
     source: String(l.source),
+    session: l.session === null || l.session === undefined ? null : String(l.session),
     type: String(l.type),
     action: l.action === null ? null : String(l.action),
     depot: l.depot === null ? null : String(l.depot),

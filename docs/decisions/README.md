@@ -14,6 +14,8 @@ défaire à bon compte, et dont quelqu'un — dans six mois, ou six ans — voud
 | [0005](0005-analyse-du-yaml.md) | Analyse du YAML de cairn-wms | Avec quoi le suivi de cairn-wms est lu, et pourquoi on ne suppose pas son format. |
 | [0006](0006-bibliotheque-sqlite.md) | Bibliothèque d'accès à SQLite | Par quoi le dashboard écrit sa seule donnée propre, et ce que le choix impose au `Dockerfile`. |
 | [0007](0007-historique-des-evenements.md) | Historique des événements | Le schéma de l'historique, et combien de temps il est conservé. |
+| [0008](0008-reception-des-evenements-de-session.md) | Réception des événements des sessions Claude Code | Par quel mécanisme les sessions alimentent le fil, ce qu'elles en disent et ce qu'elles taisent. |
+| [0009](0009-identite-des-evenements-de-session.md) | Identité et rangement des événements de session | Ce qui distingue deux événements de session, et comment le fil les regroupe. |
 
 Ces décisions n'engagent que le dashboard. Elles ne tranchent rien pour cairn-wms, dont les choix se
 font dans son propre dépôt — et réciproquement.

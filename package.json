@@ -14,7 +14,8 @@
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",
     "test": "vitest run",
-    "visuel": "node scripts/visuel/captures.mjs"
+    "visuel": "node scripts/visuel/captures.mjs",
+    "hooks:installer": "node scripts/hooks/installer.mjs"
   },
   "dependencies": {
     "@octokit/rest": "^22.0.1",
