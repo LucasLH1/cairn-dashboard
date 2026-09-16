@@ -6,7 +6,6 @@ definePageMeta({ titre: 'Vue d\'ensemble' })
 useHead({ title: 'Cairn Dashboard — vue d\'ensemble' })
 
 const aVenir = [
-  { tranche: '2', texte: 'Consultation de la documentation de cairn-wms.' },
   { tranche: '3', texte: 'Avancement, lu dans le suivi de cairn-wms.' },
   { tranche: '4', texte: 'Tickets : liste, filtres et création.' },
   { tranche: '5', texte: 'Journal et fil d\'activité en direct.' },
@@ -28,8 +27,8 @@ const aVenir = [
         par GitHub, il n'en est qu'une vue.
       </p>
       <p class="second">
-        L'accès est réservé à un seul compte, et le socle visuel suit le design
-        de référence. Aucune donnée n'est encore affichée.
+        La <NuxtLink to="/documentation">documentation de cairn-wms</NuxtLink> s'y
+        consulte déjà, lue à la source à chaque affichage.
       </p>
     </BaseCard>
 
