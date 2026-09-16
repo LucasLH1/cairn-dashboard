@@ -1,6 +1,6 @@
 # 0004 — Rendu du Markdown de cairn-wms
 
-**Statut** : proposée · **Date** : 2026-09-16 · **Remplace** : — · **Remplacée par** : —
+**Statut** : actée · **Date** : 2026-09-16 · **Remplace** : — · **Remplacée par** : —
 
 ## Contexte
 
@@ -74,7 +74,8 @@ ne se voit pas. Une faille silencieuse coûte plus cher que 1,4 Mo de dépendanc
 
 Le surcoût de poids est accepté : il ne concerne que l'image du serveur, jamais le navigateur.
 
-*Fiche proposée, non validée : rien n'est mis en œuvre tant qu'elle n'est pas actée.*
+Décision validée en séance le 2026-09-16, sur les trois options ci-dessus. Elle n'engage en rien la
+pile de cairn-wms.
 
 ## Conséquences
 
