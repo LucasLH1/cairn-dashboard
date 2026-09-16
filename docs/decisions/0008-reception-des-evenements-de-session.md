@@ -1,6 +1,6 @@
 # 0008 — Réception des événements des sessions Claude Code
 
-**Statut** : proposée · **Date** : 2026-09-16 · **Remplace** : — · **Remplacée par** : —
+**Statut** : actée · **Date** : 2026-09-16 · **Remplace** : — · **Remplacée par** : —
 
 ## Contexte
 
@@ -150,6 +150,27 @@ constant, suffit — et fait un script sans dépendance à `openssl`.
 Un secret absent de la configuration du serveur fait répondre `503`, comme pour les webhooks : on
 refuse tout plutôt que d'accepter n'importe quoi.
 
+### Où vivent le script et la configuration
+
+Le script est **versionné et éprouvé dans le seul dépôt du dashboard**, puis **installé** sur le
+poste à un emplacement fixe par une commande dédiée. Chaque dépôt suivi active les hooks dans son
+propre `.claude/settings.json` versionné, qui ne fait qu'appeler le script installé.
+
+- **Rien n'est déclaré dans `~/.claude/settings.json`** : les hooks partiraient alors de tous les
+  projets du poste, y compris ceux qui n'ont rien à voir avec Cairn.
+- **Un script absent est un échec silencieux** : un poste qui ne l'a pas installé n'émet rien, et la
+  session n'en sait rien. C'est le comportement voulu pour deux dépôts publics que n'importe qui peut
+  cloner.
+- **Le script refuse tout dépôt qu'il ne connaît pas** : il n'émet que depuis `cairn-wms` et
+  `cairn-dashboard`. Un `.claude/settings.json` recopié ailleurs n'enverrait rien.
+- **Le secret vit dans la section `env` de `~/.claude/settings.json`**, hors de tout dépôt, en droits
+  `600`. Vérifié à la source le 2026-09-16 : les valeurs de `env` « atteignent tous les sous-processus
+  que Claude Code démarre », dont les hooks. Cet emplacement est préféré à `~/.bashrc`, que les
+  sessions à distance ne chargent pas nécessairement.
+
+Validée en séance le 2026-09-16, cette variante ayant été retenue contre la première rédaction, qui
+versait un script dans chaque dépôt.
+
 ## Conséquences
 
 - **Ce qu'on peut faire** : suivre l'activité réelle des sessions sur les deux dépôts, dans le même
@@ -162,14 +183,17 @@ refuse tout plutôt que d'accepter n'importe quoi.
   - la route publique de réception, inscrite dans la liste fermée de `server/utils/acces.ts`, avec
     taille bornée, débit limité — **au plus 120 événements par minute**, au-delà desquels on refuse
     sans rien écrire — et comparaison du secret à temps constant ;
-  - le script d'envoi et la configuration `.claude/settings.json` de **ce** dépôt ;
+  - le script d'envoi, sa commande d'installation et ses tests, dans ce dépôt ;
+  - le `.claude/settings.json` de ce dépôt, versionné ;
   - la variable `NUXT_HOOKS_SECRET` côté serveur, nommée sans valeur dans `.env.example`, et la
-    variable `CAIRN_HOOKS_SECRET` côté poste ;
-  - **côté cairn-wms, une session distincte** : ce dépôt a ses propres règles, son journal et son
-    `status.yml`. Rien n'y sera versé depuis ici.
-- **Ce qu'on accepte de payer** : un script à tenir dans deux dépôts plutôt qu'une configuration
-  déclarative ; une variable à définir sur chaque poste ; et un événement perdu sans trace si le
-  dashboard est indisponible — un hook asynchrone n'a ni accusé de réception ni réémission.
+    variable `CAIRN_HOOKS_SECRET` dans la section `env` de `~/.claude/settings.json` ;
+  - **le contenu exact du `.claude/settings.json` de cairn-wms**, préparé ici mais **posé là-bas par
+    une session dédiée** : ce dépôt a ses propres règles, son journal et son `status.yml`. Rien n'y
+    sera versé depuis ici.
+- **Ce qu'on accepte de payer** : un script à installer sur chaque poste, et une installation à
+  refaire quand il change ; une variable à définir dans les réglages utilisateur ; et un événement
+  perdu sans trace si le dashboard est indisponible — un hook asynchrone n'a ni accusé de réception
+  ni réémission.
 - **Ce qui la remettrait en cause** : le jour où `SessionStart` accepterait les hooks `http`, ou
   qu'un hook `http` deviendrait asynchrone, l'option B redeviendrait défendable et supprimerait les
   scripts.

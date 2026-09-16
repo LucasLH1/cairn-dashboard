@@ -71,7 +71,7 @@ tranches:
 
   - id: "6"
     nom: Événements des hooks Claude Code dans le fil en direct
-    etat: à faire
+    etat: en développement
     issue: 6
     label: tranche/6-hooks-claude-code
 
