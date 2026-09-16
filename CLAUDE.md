@@ -136,9 +136,13 @@ choix visuels.
 Une tranche qui touche à l'interface n'est pas terminée sur parole. Elle l'est quand la comparaison
 a été faite, et montrée :
 
-- des captures de **l'application** et de **l'écran correspondant du design**, prises aux **mêmes
-  largeurs** — 1440 px pour le bureau, 390 px pour le mobile — et dans les **deux thèmes** ;
-- prises par `scripts/visuel/captures.mjs`, et jointes à l'entrée de journal de la session ;
+- la comparaison porte sur des captures de **l'application** et de **l'écran correspondant du
+  design**, prises par `scripts/visuel/captures.mjs` aux **mêmes largeurs** — 1440 px pour le
+  bureau, 390 px pour le mobile — et dans les **deux thèmes** ;
+- **seul l'état « après » de l'application est joint** à l'entrée de journal : quatre captures
+  (1440 et 390 px, sombre et clair), **compressées** par quantification de palette
+  (`pngquant --quality=70-92 --strip`). Les captures du design ne sont pas committées : l'export
+  est dans le dépôt, elles s'en régénèrent ;
 - **tout écart visible est justifié** dans cette entrée, ou corrigé avant de livrer.
 
 Une capture qui ne montre pas l'écart n'est pas une preuve : on capture l'écran réel, connecté, tel
