@@ -23,16 +23,20 @@ function memeEtat(a: string, b: string): boolean {
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
-  const clientId = config.oauth.github.clientId
-  const clientSecret = config.oauth.github.clientSecret
 
-  if (!clientId || !clientSecret) {
+  // Rien ne sert de partir chez GitHub si la session ne pourra pas être ouverte :
+  // on refuse ici, franchement, plutôt que d'échouer au retour.
+  const etat = etatConnexion(config)
+  if (etat !== 'ok') {
     event.node.res.statusCode = 503
     event.node.res.setHeader('content-type', 'text/plain; charset=utf-8')
     event.node.res.setHeader('cache-control', 'no-store')
-    event.node.res.end('Connexion GitHub non configurée.')
+    event.node.res.end(`Connexion GitHub non configurée : ${etat}.`)
     return
   }
+
+  const clientId = config.oauth.github.clientId
+  const clientSecret = config.oauth.github.clientSecret
 
   const url = getRequestURL(event, { xForwardedHost: true, xForwardedProto: true })
   const urlRappel = `${url.origin}/auth/github`
@@ -41,15 +45,15 @@ export default defineEventHandler(async (event) => {
 
   // Aller : on fabrique un état, on le dépose, et on part chez GitHub.
   if (!code) {
-    const etat = randomBytes(24).toString('hex')
-    setCookie(event, NOM_COOKIE_ETAT, etat, {
+    const jeton = randomBytes(24).toString('hex')
+    setCookie(event, NOM_COOKIE_ETAT, jeton, {
       httpOnly: true,
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
       path: '/',
       maxAge: 600,
     })
-    rediriger(event, urlAutorisation(clientId, urlRappel, etat))
+    rediriger(event, urlAutorisation(clientId, urlRappel, jeton))
     return
   }
 
@@ -61,13 +65,13 @@ export default defineEventHandler(async (event) => {
     return
   }
 
-  const jeton = await echangerCode(globalThis.fetch, { clientId, clientSecret, code, urlRappel })
-  if (!jeton) {
+  const jetonAcces = await echangerCode(globalThis.fetch, { clientId, clientSecret, code, urlRappel })
+  if (!jetonAcces) {
     rediriger(event, '/connexion?erreur=jeton')
     return
   }
 
-  const utilisateur = await lireUtilisateur(globalThis.fetch, jeton)
+  const utilisateur = await lireUtilisateur(globalThis.fetch, jetonAcces)
   if (!utilisateur) {
     rediriger(event, '/connexion?erreur=identite')
     return
