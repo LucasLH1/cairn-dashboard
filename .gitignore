@@ -69,5 +69,6 @@ tmp/
 temp/
 .cache/
 
-# Sorties de l'épreuve visuelle (règle 7) : reproductibles, non suivies.
-captures/
+# Sorties de travail de l'épreuve visuelle (règle 7), à la racine seulement :
+# reproductibles. Les captures jointes au journal, elles, sont suivies.
+/captures/
