@@ -49,7 +49,7 @@ tranches:
 
   - id: "2"
     nom: Consultation de la doc de cairn-wms
-    etat: en développement
+    etat: livré
     issue: 2
     label: tranche/2-doc
 
