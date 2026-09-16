@@ -25,13 +25,13 @@
 # À tenir à jour à chaque session, en même temps que journal/ et les issues.
 
 projet: Cairn Dashboard
-mis_a_jour_le: 2026-09-15
+mis_a_jour_le: 2026-09-16
 
 tranches:
 
   - id: "1a"
     nom: Squelette Nuxt, thème et composants du design, CI, mise en ligne
-    etat: à faire
+    etat: en développement
     issue: 1
     label: tranche/1a-squelette
 
