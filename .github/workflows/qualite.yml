@@ -28,6 +28,14 @@ jobs:
           node-version: 22
           cache: npm
 
+      # Le verrou dépend de la version de npm qui l'écrit : on prend celle que le
+      # dépôt déclare, pour que poste et intégration résolvent à l'identique.
+      - name: Fixer la version de npm, celle du dépôt
+        run: |
+          V=$(node -p "require('./package.json').packageManager.split('@')[1]")
+          npm install -g "npm@$V"
+          npm --version
+
       - name: Installer les dépendances
         run: npm ci --no-audit --no-fund
 
