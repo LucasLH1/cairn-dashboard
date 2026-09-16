@@ -55,7 +55,7 @@ tranches:
 
   - id: "3"
     nom: Avancement à partir du status.yml de cairn-wms
-    etat: à faire
+    etat: en développement
     issue: 3
     label: tranche/3-avancement
 
