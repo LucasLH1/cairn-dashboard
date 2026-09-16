@@ -14,8 +14,6 @@
 #   livré              la tranche est utilisable de bout en bout, en production
 #                      sur main
 #
-# Aucune tranche n'est aujourd'hui « en développement » ni « livré » : le dépôt
-# ne contient aucun code applicatif.
 #
 # Les identifiants sont des chaînes, entre guillemets : « 1a » n'est pas un
 # nombre, et toutes les tranches gardent la même forme. Le champ « issue »
@@ -67,7 +65,7 @@ tranches:
 
   - id: "5"
     nom: Journal et fil d'activité en direct (webhooks GitHub)
-    etat: en développement
+    etat: livré
     issue: 5
     label: tranche/5-fil-activite
 
