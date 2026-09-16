@@ -68,3 +68,6 @@ $RECYCLE.BIN/
 tmp/
 temp/
 .cache/
+
+# Sorties de l'épreuve visuelle (règle 7) : reproductibles, non suivies.
+captures/
