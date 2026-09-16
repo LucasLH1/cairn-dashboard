@@ -67,7 +67,7 @@ tranches:
 
   - id: "5"
     nom: Journal et fil d'activité en direct (webhooks GitHub)
-    etat: à faire
+    etat: en développement
     issue: 5
     label: tranche/5-fil-activite
 

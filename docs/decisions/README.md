@@ -12,6 +12,8 @@ défaire à bon compte, et dont quelqu'un — dans six mois, ou six ans — voud
 | [0003](0003-dashboard-un-seul-environnement.md) | Dashboard : un seul environnement, production | Combien d'environnements, et ce qui déclenche la mise en production. |
 | [0004](0004-rendu-du-markdown.md) | Rendu du Markdown de cairn-wms | Avec quoi la documentation est rendue en HTML, et comment le HTML brut est neutralisé. |
 | [0005](0005-analyse-du-yaml.md) | Analyse du YAML de cairn-wms | Avec quoi le suivi de cairn-wms est lu, et pourquoi on ne suppose pas son format. |
+| [0006](0006-bibliotheque-sqlite.md) | Bibliothèque d'accès à SQLite | Par quoi le dashboard écrit sa seule donnée propre, et ce que le choix impose au `Dockerfile`. |
+| [0007](0007-historique-des-evenements.md) | Historique des événements | Le schéma de l'historique, et combien de temps il est conservé. |
 
 Ces décisions n'engagent que le dashboard. Elles ne tranchent rien pour cairn-wms, dont les choix se
 font dans son propre dépôt — et réciproquement.

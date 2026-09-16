@@ -1,6 +1,6 @@
 # 0006 — Bibliothèque d'accès à SQLite
 
-**Statut** : proposée · **Date** : 2026-09-16 · **Remplace** : — · **Remplacée par** : —
+**Statut** : actée · **Date** : 2026-09-16 · **Remplace** : — · **Remplacée par** : —
 
 ## Contexte
 
@@ -76,7 +76,8 @@ Le statut expérimental est le prix à payer, et il est **borné par deux mesure
 derrière un module unique, et **la version de Node est épinglée dans le `Dockerfile`** — sans quoi une
 reconstruction pourrait tirer une version mineure dont l'API aurait changé.
 
-*Fiche proposée, non validée : rien n'est mis en œuvre tant qu'elle n'est pas actée.*
+Décision validée en séance le 2026-09-16, sur les trois options mesurées ci-dessus. Elle n'engage en
+rien la pile de cairn-wms.
 
 ## Conséquences
 

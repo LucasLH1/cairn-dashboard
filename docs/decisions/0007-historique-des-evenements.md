@@ -1,6 +1,6 @@
 # 0007 — Schéma et conservation de l'historique des événements
 
-**Statut** : proposée · **Date** : 2026-09-16 · **Remplace** : — · **Remplacée par** : —
+**Statut** : actée · **Date** : 2026-09-16 · **Remplace** : — · **Remplacée par** : —
 
 ## Contexte
 
@@ -102,7 +102,8 @@ comprises, l'ordre de grandeur est de quelques dizaines de mégaoctets. Une dur�
 perdre la comparaison d'une année sur l'autre ; une conservation sans limite ferait grandir sans
 raison une base que personne ne surveille.
 
-*Fiche proposée, non validée : rien n'est mis en œuvre tant qu'elle n'est pas actée.*
+Décision validée en séance le 2026-09-16 : table unique, charge conservée entière, et conservation
+d'un an. Elle n'engage en rien la pile de cairn-wms.
 
 ## Conséquences
 
