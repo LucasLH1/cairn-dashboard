@@ -21,12 +21,33 @@ BASE="http://127.0.0.1:${PORT}"
 nettoyer() { docker rm -f "$NOM" >/dev/null 2>&1 || true; }
 trap nettoyer EXIT
 
+MDP_SESSION="$(head -c 48 /dev/urandom | base64 | tr -d '\n')"
+ID_AUTORISE=68059501
+
 demarrer() { # $1 = jeton de lecture
   nettoyer
   docker run -d --name "$NOM" -p "127.0.0.1:${PORT}:3000" \
     -e "NUXT_GITHUB_TOKEN=$1" \
     -e "NUXT_GITHUB_REPO=${NUXT_GITHUB_REPO:-}" \
+    -e "NUXT_SESSION_PASSWORD=${MDP_SESSION}" \
+    -e "NUXT_ALLOWED_GITHUB_ID=${ID_AUTORISE}" \
     "$IMAGE" >/dev/null
+}
+
+# Forge une session scellée comme le serveur le ferait, pour éprouver le
+# garde-fou : un sceau valide ne doit pas suffire à entrer.
+forger_session() { # $1 = identifiant numérique
+  MDP="$MDP_SESSION" ID="$1" node --input-type=module -e '
+    import { seal, defaults } from "iron-webcrypto"
+    import { webcrypto } from "node:crypto"
+    const id = Number(process.env.ID)
+    process.stdout.write(await seal(
+      webcrypto,
+      { id: `epreuve-${id}`, createdAt: Date.now(), data: { id, login: "compte-eprouve" } },
+      process.env.MDP,
+      { ...defaults, ttl: 12 * 3600 * 1000 },
+    ))
+  '
 }
 
 attendre() {
@@ -71,6 +92,22 @@ esac
 verifier_code /connexion 200 "écran de connexion"
 verifier_code /api/moi 401 "route de données"
 verifier_code /auth/github 503 "connexion non configurée"
+
+echo "== un sceau valide ne suffit pas : l'identifiant est revérifié"
+SESSION_AUTRE="$(forger_session 999999)"
+SESSION_BONNE="$(forger_session "$ID_AUTORISE")"
+CODE=$(curl -s -o /dev/null -m 10 -b "cairn_session=${SESSION_AUTRE}" -w '%{http_code}' "${BASE}/")
+CIBLE=$(curl -s -o /dev/null -m 10 -b "cairn_session=${SESSION_AUTRE}" -w '%{redirect_url}' "${BASE}/")
+case "${CODE}:${CIBLE}" in
+  302:*/refus) echo "   session d'un autre identifiant : refusée vers ${CIBLE}" ;;
+  *) echo "une session scellée d'un autre identifiant a été acceptée (${CODE} ${CIBLE})"; exit 1 ;;
+esac
+CODE=$(curl -s -o /dev/null -m 10 -b "cairn_session=${SESSION_AUTRE}" -w '%{http_code}' "${BASE}/api/moi")
+if [ "$CODE" != "401" ]; then echo "route de données : attendu 401 pour un autre identifiant, obtenu $CODE"; exit 1; fi
+echo "   route de données : 401"
+CODE=$(curl -s -o /dev/null -m 10 -b "cairn_session=${SESSION_BONNE}" -w '%{http_code}' "${BASE}/")
+if [ "$CODE" != "200" ]; then echo "le compte autorisé devrait entrer, obtenu $CODE"; exit 1; fi
+echo "   session du compte autorisé : 200"
 
 echo "== dépendance coupée : /health répond 503"
 demarrer "jeton-invalide-pour-l-epreuve"
