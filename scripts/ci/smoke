@@ -24,13 +24,17 @@ trap nettoyer EXIT
 MDP_SESSION="$(head -c 48 /dev/urandom | base64 | tr -d '\n')"
 ID_AUTORISE=68059501
 
-demarrer() { # $1 = jeton de lecture
+# Identifiants OAuth factices : ils ne servent qu'à rendre la configuration
+# complète. Aucun appel n'est fait chez GitHub pendant l'épreuve.
+demarrer() { # $1 = jeton de lecture, $2 = secret de session (défaut : le bon)
   nettoyer
   docker run -d --name "$NOM" -p "127.0.0.1:${PORT}:3000" \
     -e "NUXT_GITHUB_TOKEN=$1" \
     -e "NUXT_GITHUB_REPO=${NUXT_GITHUB_REPO:-}" \
-    -e "NUXT_SESSION_PASSWORD=${MDP_SESSION}" \
+    -e "NUXT_SESSION_PASSWORD=${2:-$MDP_SESSION}" \
     -e "NUXT_ALLOWED_GITHUB_ID=${ID_AUTORISE}" \
+    -e "NUXT_OAUTH_GITHUB_CLIENT_ID=epreuve" \
+    -e "NUXT_OAUTH_GITHUB_CLIENT_SECRET=epreuve" \
     "$IMAGE" >/dev/null
 }
 
@@ -91,7 +95,11 @@ case "$CIBLE" in
 esac
 verifier_code /connexion 200 "écran de connexion"
 verifier_code /api/moi 401 "route de données"
-verifier_code /auth/github 503 "connexion non configurée"
+CIBLE=$(curl -s -o /dev/null -m 10 -w '%{redirect_url}' "${BASE}/auth/github")
+case "$CIBLE" in
+  https://github.com/login/oauth/authorize*) echo "   connexion configurée : part chez GitHub" ;;
+  *) echo "la connexion devrait mener chez GitHub, elle mène à '${CIBLE}'"; exit 1 ;;
+esac
 
 echo "== un sceau valide ne suffit pas : l'identifiant est revérifié"
 SESSION_AUTRE="$(forger_session 999999)"
@@ -108,6 +116,17 @@ echo "   route de données : 401"
 CODE=$(curl -s -o /dev/null -m 10 -b "cairn_session=${SESSION_BONNE}" -w '%{http_code}' "${BASE}/")
 if [ "$CODE" != "200" ]; then echo "le compte autorisé devrait entrer, obtenu $CODE"; exit 1; fi
 echo "   session du compte autorisé : 200"
+
+echo "== configuration de connexion incomplète : l'application se déclare malsaine"
+demarrer "${NUXT_GITHUB_TOKEN}" "trop-court-16car"
+attendre
+CODE=$(curl -s -o /tmp/smoke-corps -m 10 -w '%{http_code}' "${BASE}/health")
+if [ "$CODE" != "503" ]; then
+  echo "un secret de session tronqué devrait rendre /health malsain : obtenu $CODE — $(cat /tmp/smoke-corps)"
+  exit 1
+fi
+echo "   /health : 503 · $(cat /tmp/smoke-corps)"
+verifier_code /auth/github 503 "connexion refusée franchement"
 
 echo "== dépendance coupée : /health répond 503"
 demarrer "jeton-invalide-pour-l-epreuve"
