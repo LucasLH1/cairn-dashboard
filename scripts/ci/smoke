@@ -23,6 +23,7 @@ trap nettoyer EXIT
 
 MDP_SESSION="$(head -c 48 /dev/urandom | base64 | tr -d '\n')"
 ID_AUTORISE=68059501
+SECRET_HOOKS="$(head -c 32 /dev/urandom | base64 | tr -d '\n')"
 
 # Identifiants OAuth factices : ils ne servent qu'à rendre la configuration
 # complète. Aucun appel n'est fait chez GitHub pendant l'épreuve.
@@ -35,6 +36,7 @@ demarrer() { # $1 = jeton de lecture, $2 = secret de session (défaut : le bon)
     -e "NUXT_ALLOWED_GITHUB_ID=${ID_AUTORISE}" \
     -e "NUXT_OAUTH_GITHUB_CLIENT_ID=epreuve" \
     -e "NUXT_OAUTH_GITHUB_CLIENT_SECRET=epreuve" \
+    -e "NUXT_HOOKS_SECRET=${SECRET_HOOKS}" \
     "$IMAGE" >/dev/null
 }
 
@@ -121,6 +123,44 @@ CODE=$(curl -s -o /dev/null -m 10 -b "cairn_session=${SESSION_BONNE}" -w '%{http
 if [ "$CODE" != "200" ]; then echo "le compte autorisé devrait entrer, obtenu $CODE"; exit 1; fi
 echo "   session du compte autorisé : 200"
 
+# La seconde porte publique (tranche 6) : elle répond sans session, et refuse
+# tout ce qui n'est pas authentifié. Un garde-fou qui ne refuse jamais n'est pas
+# prouvé — on éprouve donc surtout les cas qui doivent échouer.
+echo "== la porte des hooks refuse ce qui n'est pas authentifié"
+poster() { # $1 = secret porté, $2 = corps
+  curl -s -o /tmp/smoke-corps -m 10 -w '%{http_code}' -X POST \
+    -H 'content-type: application/json' -H "x-cairn-hooks-secret: $1" \
+    -d "$2" "${BASE}/hooks/claude-code"
+}
+MSG_BON='{"cle":"claude-code:epreuve-1","evenement":"Stop","session":"s-epreuve","depot":"cairn-dashboard","outil":null,"motif":null,"agent":null,"horodatage":"2026-09-16T12:00:00.000Z"}'
+
+CODE=$(curl -s -o /tmp/smoke-corps -m 10 -w '%{http_code}' -X POST "${BASE}/hooks/claude-code")
+if [ "$CODE" != "401" ]; then echo "sans secret : attendu 401, obtenu $CODE — $(cat /tmp/smoke-corps)"; exit 1; fi
+echo "   sans secret : 401 · $(cat /tmp/smoke-corps)"
+
+CODE=$(poster "un-secret-qui-n-est-pas-le-bon" "$MSG_BON")
+if [ "$CODE" != "401" ]; then echo "mauvais secret : attendu 401, obtenu $CODE"; exit 1; fi
+echo "   mauvais secret : 401"
+
+CODE=$(poster "$SECRET_HOOKS" "$(echo "$MSG_BON" | sed 's/"Stop"/"PreToolUse"/')")
+if [ "$CODE" != "422" ]; then echo "événement hors liste : attendu 422, obtenu $CODE"; exit 1; fi
+echo "   événement hors liste : 422 · $(cat /tmp/smoke-corps)"
+
+CODE=$(poster "$SECRET_HOOKS" "$(echo "$MSG_BON" | sed 's/cairn-dashboard/un-autre-projet/')")
+if [ "$CODE" != "422" ]; then echo "dépôt inconnu : attendu 422, obtenu $CODE"; exit 1; fi
+echo "   dépôt inconnu : 422 · $(cat /tmp/smoke-corps)"
+
+CODE=$(poster "$SECRET_HOOKS" "$MSG_BON")
+if [ "$CODE" != "200" ]; then echo "message conforme : attendu 200, obtenu $CODE — $(cat /tmp/smoke-corps)"; exit 1; fi
+echo "   message conforme : 200 · $(cat /tmp/smoke-corps)"
+
+CODE=$(poster "$SECRET_HOOKS" "$MSG_BON")
+if [ "$CODE" != "200" ]; then echo "même clé renvoyée : attendu 200, obtenu $CODE"; exit 1; fi
+case "$(cat /tmp/smoke-corps)" in
+  *'"doublon":true'*) echo "   même clé renvoyée : écartée par la base" ;;
+  *) echo "une clé déjà connue aurait dû être écartée : $(cat /tmp/smoke-corps)"; exit 1 ;;
+esac
+
 echo "== configuration de connexion incomplète : l'application se déclare malsaine"
 demarrer "${NUXT_GITHUB_TOKEN}" "trop-court-16car"
 attendre
@@ -153,6 +193,15 @@ if [ "$CODE" != "503" ]; then
 fi
 echo "   /health : 503 · $(cat /tmp/smoke-corps)"
 verifier_code /live 200 "/live"
+
+# Ce conteneur-ci n'a pas de secret de hooks : la porte doit se déclarer non
+# configurée plutôt que d'accepter quoi que ce soit.
+CODE=$(curl -s -o /tmp/smoke-corps -m 10 -w '%{http_code}' -X POST "${BASE}/hooks/claude-code")
+if [ "$CODE" != "503" ]; then
+  echo "sans secret configuré, la porte des hooks devrait rendre 503 : obtenu $CODE — $(cat /tmp/smoke-corps)"
+  exit 1
+fi
+echo "   hooks sans secret configuré : 503 · $(cat /tmp/smoke-corps)"
 
 echo "== dépendance coupée : /health répond 503"
 demarrer "jeton-invalide-pour-l-epreuve"

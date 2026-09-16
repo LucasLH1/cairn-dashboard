@@ -5,7 +5,11 @@
 // pas de sondage.
 import { compter, derniers } from '../../utils/base'
 import { obtenirBase } from '../../utils/instance-base'
+import { EVENEMENTS_SESSION } from '../../utils/hooks'
 import { EVENEMENTS } from '../../utils/webhook'
+
+/** Ce que le fil sait filtrer : les deux sources, dans un seul fil. */
+const TYPES = [...EVENEMENTS, ...EVENEMENTS_SESSION] as readonly string[]
 
 /** Bornes de ce qu'une page peut demander. */
 const LIMITE_PAR_DEFAUT = 50
@@ -20,7 +24,7 @@ export default defineEventHandler((event) => {
     : LIMITE_PAR_DEFAUT
 
   const typeDemande = String(requete.type ?? '')
-  const type = (EVENEMENTS as readonly string[]).includes(typeDemande) ? typeDemande : null
+  const type = TYPES.includes(typeDemande) ? typeDemande : null
 
   try {
     const db = obtenirBase(useRuntimeConfig())

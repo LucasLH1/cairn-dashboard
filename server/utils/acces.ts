@@ -18,6 +18,11 @@ const PREFIXES = [
   // ouverte du dashboard, et sa protection est ailleurs — signature HMAC,
   // taille bornée, événements en liste fermée (server/utils/webhook.ts).
   '/webhooks/',
+  // Réception des événements des sessions Claude Code : une session n'a pas de
+  // cookie. Sa protection est ailleurs — secret partagé comparé à temps
+  // constant, taille bornée, débit limité, message reconstruit depuis une liste
+  // blanche (server/utils/hooks.ts, fiches 0008 et 0009).
+  '/hooks/',
 ]
 
 /** Vrai si ce chemin répond sans session ouverte. */

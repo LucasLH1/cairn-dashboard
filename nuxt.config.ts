@@ -27,6 +27,9 @@ export default defineNuxtConfig({
     // relire ailleurs.
     baseFichier: '',
     webhookSecret: '',
+    // Secret partagé avec les hooks Claude Code des deux dépôts suivis
+    // (fiche 0008). Sans lui, la route de réception n'accepte rien.
+    hooksSecret: '',
     oauth: {
       github: {
         clientId: '',
