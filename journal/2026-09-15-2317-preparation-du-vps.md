@@ -166,6 +166,24 @@ des trois redémarrages.
   - aucun refus n'est apparu, Coolify reste joignable et sain, et depuis l'extérieur seuls les accès
     attendus répondent.
 
+### Étape 8 — application du dashboard créée dans Coolify, sans déploiement
+
+- **Côté Lucas** : projet `cairn-dashboard`, environnement `production` et application créés dans
+  l'interface, à partir d'une image, avec un domaine unique, la redirection vers HTTPS et le port
+  interne attendu. Les domaines superflus proposés par défaut ont été retirés.
+- **Vérifié dans Coolify** : projet, environnement, nom de l'image, domaine, ports et redirection sont
+  conformes. L'application n'a jamais été déployée, n'a aucune variable d'environnement et aucun
+  déploiement en attente.
+- **Vérifié sur le serveur** : aucun conteneur, réseau, volume, image ni dossier n'a été créé pour le
+  dashboard, et aucune route n'a été ajoutée au proxy.
+- **Depuis l'extérieur** : le domaine ne sert toujours rien, ce qui est attendu avant le premier
+  déploiement, et les accès restent inchangés.
+- **Identifiant de l'application relevé** : il servira de secret de déploiement à la tranche 1a. Il est
+  conservé hors du dépôt.
+- **Un réglage n'est pas enregistré** : la désactivation de l'indexation par les moteurs de recherche
+  n'apparaît pas dans la configuration de l'application — la liste des domaines concernés est vide,
+  ce que le code de Coolify interprète comme « indexation autorisée ». À reprendre dans l'interface.
+
 ## Décisions
 
 Arbitrages validés en séance :
@@ -206,7 +224,10 @@ Arbitrages validés en séance :
 
 ## Points ouverts
 
-- Étape 8 du plan à mener, puis à consigner dans cette entrée.
+- Désactiver l'indexation du domaine du dashboard dans Coolify : le réglage annoncé n'est pas
+  enregistré.
+- Le plan de mise au propre du serveur est terminé. Reste la préparation propre à la tranche 1a :
+  jeton d'API de Coolify, secrets de déploiement, et publication de l'image du dashboard.
 - Aucun jeton d'API Coolify n'existe plus : celui du dashboard reste à créer par Lucas.
 - Chiffrer le coût des sauvegardes hors serveur.
 - Vérifier l'IPv6 entrante depuis un poste IPv6.
