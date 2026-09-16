@@ -2,7 +2,10 @@
 # le SHA est reçu en argument de construction (APP_COMMIT) et inscrit dans l'image,
 # qui sert /version et /health.
 
-FROM node:22-alpine AS build
+# Version épinglée : conséquence de la fiche 0006. `node:sqlite` est expérimental
+# sous Node 22, donc son API peut changer dans une version mineure. Une étiquette
+# mouvante ferait basculer la base du dashboard sans que personne ne l'ait décidé.
+FROM node:22.23.2-alpine AS build
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -14,7 +17,7 @@ ARG APP_COMMIT=inconnu
 ENV APP_COMMIT=$APP_COMMIT
 RUN npm run build
 
-FROM node:22-alpine AS run
+FROM node:22.23.2-alpine AS run
 WORKDIR /app
 
 ARG APP_COMMIT=inconnu
@@ -24,6 +27,14 @@ ENV APP_COMMIT=$APP_COMMIT \
     NITRO_HOST=0.0.0.0
 
 COPY --from=build /app/.output ./.output
+
+# Emplacement des données, inscriptible par l'utilisateur du conteneur : le
+# répertoire de travail ne l'est pas, et la base n'aurait nulle part où
+# s'écrire. En production, le volume persistant est monté ici — sans quoi
+# l'historique disparaîtrait à chaque redéploiement (fiche 0007).
+RUN mkdir -p /data && chown node:node /data
+VOLUME /data
+ENV NUXT_BASE_FICHIER=/data/cairn.db
 
 USER node
 EXPOSE 3000

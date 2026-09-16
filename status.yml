@@ -61,13 +61,13 @@ tranches:
 
   - id: "4"
     nom: "Tickets : liste, filtres, création"
-    etat: en développement
+    etat: livré
     issue: 4
     label: tranche/4-tickets
 
   - id: "5"
     nom: Journal et fil d'activité en direct (webhooks GitHub)
-    etat: à faire
+    etat: en développement
     issue: 5
     label: tranche/5-fil-activite
 

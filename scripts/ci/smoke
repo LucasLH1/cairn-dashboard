@@ -132,6 +132,28 @@ fi
 echo "   /health : 503 · $(cat /tmp/smoke-corps)"
 verifier_code /auth/github 503 "connexion refusée franchement"
 
+# La base est la seule donnée propre du dashboard : un emplacement non
+# inscriptible doit se voir au démarrage, pas au premier webhook perdu.
+echo "== base inaccessible : /health répond 503, /live tient"
+nettoyer
+docker run -d --name "$NOM" -p "127.0.0.1:${PORT}:3000" \
+  -e "NUXT_GITHUB_TOKEN=${NUXT_GITHUB_TOKEN}" \
+  -e "NUXT_GITHUB_REPO=${NUXT_GITHUB_REPO:-}" \
+  -e "NUXT_SESSION_PASSWORD=${MDP_SESSION}" \
+  -e "NUXT_ALLOWED_GITHUB_ID=${ID_AUTORISE}" \
+  -e "NUXT_OAUTH_GITHUB_CLIENT_ID=epreuve" \
+  -e "NUXT_OAUTH_GITHUB_CLIENT_SECRET=epreuve" \
+  -e "NUXT_BASE_FICHIER=/interdit/cairn.db" \
+  "$IMAGE" >/dev/null
+attendre
+CODE=$(curl -s -o /tmp/smoke-corps -m 10 -w '%{http_code}' "${BASE}/health")
+if [ "$CODE" != "503" ]; then
+  echo "une base inaccessible devrait rendre /health malsain : obtenu $CODE — $(cat /tmp/smoke-corps)"
+  exit 1
+fi
+echo "   /health : 503 · $(cat /tmp/smoke-corps)"
+verifier_code /live 200 "/live"
+
 echo "== dépendance coupée : /health répond 503"
 demarrer "jeton-invalide-pour-l-epreuve"
 attendre

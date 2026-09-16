@@ -15,9 +15,39 @@ const { data: avancement } = await useFetch<{
 
 const ORDRE = ['à faire', 'spécifié', 'en développement', 'livré']
 
+// Fil d'activité — tranche 5. L'historique est chargé une fois ; les nouveautés
+// arrivent ensuite par le WebSocket, sans sondage ni rechargement.
+interface EvenementFil {
+  livraison: string
+  type: string
+  titre: string | null
+  auteur: string | null
+}
+
+const COMBIEN = 8
+
+const { data: fil } = await useFetch<{
+  evenements?: EvenementFil[]
+  total?: number
+  echec?: string
+}>('/api/fil', { query: { limite: COMBIEN }, default: () => ({}) })
+
+const evenements = ref<EvenementFil[]>([...(fil.value?.evenements ?? [])])
+
+const { etat } = useFilDirect((recu) => {
+  const e = recu as unknown as EvenementFil
+  // Une livraison déjà présente ne doit pas apparaître deux fois : le serveur
+  // ne diffuse que les nouveautés, mais une reconnexion peut recouper.
+  evenements.value = [e, ...evenements.value.filter(x => x.livraison !== e.livraison)].slice(0, COMBIEN)
+})
+
+const libelleEtat = computed(() => {
+  if (etat.value === 'ouvert') return 'en direct'
+  if (etat.value === 'connexion') return 'connexion…'
+  return 'hors ligne'
+})
+
 const aVenir = [
-  { tranche: '4', texte: 'Tickets : liste, filtres et création.' },
-  { tranche: '5', texte: 'Journal et fil d\'activité en direct.' },
   { tranche: '6', texte: 'Événements des sessions Claude Code dans le fil.' },
   { tranche: '7', texte: 'Connecteur MCP, pour Claude Chat et Cowork.' },
   { tranche: '8', texte: 'Déploiements de cairn-wms, déclenchés et suivis.' },
@@ -60,11 +90,29 @@ const aVenir = [
 
     <BaseCard
       titre="Activité"
-      sous-titre="Fil des événements du projet"
+      :sous-titre="`Fil des événements du projet · ${libelleEtat}`"
+      :mention="fil?.total ? String(fil.total) : undefined"
     >
+      <EtatEchec
+        v-if="fil?.echec"
+        titre="Historique indisponible"
+        detail="Le dashboard n'a pas pu lire son historique. Les événements reçus pendant ce temps ne sont pas perdus : ils sont écrits avant d'être affichés."
+      />
+
+      <ul v-else-if="evenements.length" class="fil">
+        <li v-for="e in evenements" :key="e.livraison" class="evenement">
+          <span class="pastille" :class="`pastille--${e.type}`" aria-hidden="true" />
+          <span class="corps">
+            <span class="ligne">{{ e.titre ?? e.type }}</span>
+            <span class="meta">{{ e.type }}<span v-if="e.auteur"> · {{ e.auteur }}</span></span>
+          </span>
+        </li>
+      </ul>
+
       <EtatVide
-        message="Rien à afficher pour l'instant."
-        mention="Le fil en direct arrive avec la tranche 5."
+        v-else
+        message="Aucun événement reçu pour l'instant."
+        mention="Le fil se remplira au premier push, ticket ou déploiement sur cairn-wms."
       />
     </BaseCard>
 
@@ -125,6 +173,69 @@ const aVenir = [
 .libelle {
   color: var(--c-muted);
   font-size: var(--fs-sm);
+}
+
+/* Le fil d'activité : les briques du design — tuile, pastille d'état, texte
+   secondaire — comme partout ailleurs. */
+.fil {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.evenement {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 8px var(--sp-4);
+  border-radius: var(--r-tile);
+  background: var(--c-tile);
+}
+
+.pastille {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--c-dim);
+}
+
+.pastille--push {
+  background: var(--c-info);
+}
+
+.pastille--issues {
+  background: var(--c-accent);
+}
+
+.pastille--pull_request {
+  background: var(--c-ok);
+}
+
+.pastille--workflow_run {
+  background: var(--c-warn);
+}
+
+.corps {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ligne {
+  overflow: hidden;
+  color: var(--c-text);
+  font-size: var(--fs-md);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  color: var(--c-dim);
+  font-size: var(--fs-xs);
 }
 
 .liste {
