@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# Épreuve de l'image avant publication — docs/deploiement.md §1 et §2 :
+# démarrage réel, /version rend CE SHA, /health répond 200 avec ses dépendances,
+# puis 503 une fois une dépendance coupée. Un garde-fou qui ne refuse jamais
+# n'est pas prouvé.
+#
+#   scripts/ci/smoke <image> <sha>
+#
+# Variables attendues : NUXT_GITHUB_TOKEN, NUXT_GITHUB_REPO (cas nominal).
+set -euo pipefail
+
+IMAGE="${1:?image attendue}"
+SHA="${2:?sha attendu}"
+PORT="${SMOKE_PORT:-3010}"
+NOM="smoke-$$"
+BASE="http://127.0.0.1:${PORT}"
+
+nettoyer() { docker rm -f "$NOM" >/dev/null 2>&1 || true; }
+trap nettoyer EXIT
+
+demarrer() { # $1 = jeton
+  nettoyer
+  docker run -d --name "$NOM" -p "127.0.0.1:${PORT}:3000" \
+    -e "NUXT_GITHUB_TOKEN=$1" \
+    -e "NUXT_GITHUB_REPO=${NUXT_GITHUB_REPO:-}" \
+    "$IMAGE" >/dev/null
+}
+
+attendre() { # attend que le serveur réponde
+  for _ in $(seq 1 60); do
+    if curl -sf -m 3 -o /dev/null "${BASE}/version"; then return 0; fi
+    sleep 1
+  done
+  echo "le conteneur ne répond pas sur ${BASE}/version"; docker logs "$NOM" | tail -20; return 1
+}
+
+echo "== démarrage de l'image avec un jeton valide"
+demarrer "${NUXT_GITHUB_TOKEN:?jeton attendu}"
+attendre
+
+echo "== /version rend le SHA construit"
+VU=$(curl -sf -m 5 "${BASE}/version" | sed -n 's/.*"commit" *: *"\([^"]*\)".*/\1/p')
+if [ "$VU" != "$SHA" ]; then echo "attendu $SHA, obtenu '${VU}'"; exit 1; fi
+echo "   $VU"
+
+echo "== /health répond 200"
+CODE=$(curl -s -o /tmp/smoke-health -m 10 -w '%{http_code}' "${BASE}/health")
+if [ "$CODE" != "200" ]; then echo "attendu 200, obtenu $CODE : $(cat /tmp/smoke-health)"; docker logs "$NOM" | tail -20; exit 1; fi
+echo "   $(cat /tmp/smoke-health)"
+
+echo "== dépendance coupée : /health répond 503"
+demarrer "jeton-invalide-pour-l-epreuve"
+attendre
+CODE=$(curl -s -o /tmp/smoke-health -m 10 -w '%{http_code}' "${BASE}/health")
+if [ "$CODE" != "503" ]; then echo "attendu 503, obtenu $CODE : $(cat /tmp/smoke-health)"; exit 1; fi
+echo "   $(cat /tmp/smoke-health)"
+
+echo "== image éprouvée"

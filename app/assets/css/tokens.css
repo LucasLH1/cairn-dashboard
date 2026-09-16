@@ -1,0 +1,95 @@
+/* Jetons du design — couleurs, espacements, rayons et tailles relevés dans
+   design/cairn-design-system.html. Imposés par la règle 7 de CLAUDE.md :
+   on les reprend tels quels, on n'en invente pas.
+
+   Le design porte deux thèmes. Le sombre est celui par défaut ; le clair
+   reprend les mêmes rôles. Le choix du visiteur prime sur celui du système. */
+
+:root {
+  color-scheme: dark;
+
+  /* Fonds, du plus profond au plus clair */
+  --c-side: #08090a;
+  --c-rail: #0b0c0e;
+  --c-window: #0e0f11;
+  --c-card: #16181b;
+  --c-tile: #1b1e22;
+
+  /* Bordures et textes */
+  --c-border: #212429;
+  --c-text: #e8eaec;
+  --c-muted: #8a9099;
+  --c-dim: #676d75;
+
+  /* Accent et états */
+  --c-accent: #f0562f;
+  --c-accent-soft: #f4874f;
+  --c-ok: #45b97a;
+  --c-info: #7ea2e8;
+  --c-info-soft: #9ab6f0;
+  --c-alert: #e2554a;
+  --c-alert-soft: #f07268;
+  --c-warn: #dda145;
+
+  /* Rayons */
+  --r-card: 11px;
+  --r-tile: 10px;
+  --r-chip: 7px;
+  --r-pill: 99px;
+
+  /* Espacements */
+  --sp-1: 5px;
+  --sp-2: 6px;
+  --sp-3: 9px;
+  --sp-4: 10px;
+  --sp-5: 14px;
+  --sp-6: 18px;
+
+  /* Tailles de texte */
+  --fs-xs: 11px;
+  --fs-sm: 11.5px;
+  --fs-md: 12.5px;
+  --fs-base: 13px;
+  --fs-lg: 14px;
+  --fs-xl: 17px;
+
+  /* Ossature */
+  --h-header: 64px;
+  --w-rail: 64px;
+
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
+}
+
+/* Thème clair du design */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --c-side: #fcfcfd;
+  --c-rail: #f1f1f3;
+  --c-window: #f8f8f9;
+  --c-card: #ffffff;
+  --c-tile: #f3f4f5;
+
+  --c-border: #e6e7ea;
+  --c-text: #1a1c1f;
+  --c-muted: #6b7178;
+  --c-dim: #8b9199;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    color-scheme: light;
+
+    --c-side: #fcfcfd;
+    --c-rail: #f1f1f3;
+    --c-window: #f8f8f9;
+    --c-card: #ffffff;
+    --c-tile: #f3f4f5;
+
+    --c-border: #e6e7ea;
+    --c-text: #1a1c1f;
+    --c-muted: #6b7178;
+    --c-dim: #8b9199;
+  }
+}

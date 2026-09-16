@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Tests. Appelé par qualite.yml.
+set -euo pipefail
+cd "$(dirname "$0")/../.."
+
+echo "== vitest"
+npm run --silent test
