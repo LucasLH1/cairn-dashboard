@@ -1,15 +1,23 @@
 <script setup lang="ts">
 // Rail de navigation du design : des icônes seules, jamais de libellé écrit —
 // le libellé vit dans l'infobulle, et dans un texte réservé aux lecteurs
-// d'écran. Les entrées dont la tranche n'est pas livrée restent inertes.
+// d'écran. Une entrée dont la tranche n'est pas livrée reste inerte.
+const route = useRoute()
+
 const sections = [
-  { id: 'accueil', libelle: 'Vue d\'ensemble', icone: 'vue-ensemble', tranche: null },
-  { id: 'documentation', libelle: 'Documentation', icone: 'documentation', tranche: '2' },
-  { id: 'avancement', libelle: 'Avancement', icone: 'avancement', tranche: '3' },
-  { id: 'tickets', libelle: 'Tickets', icone: 'tickets', tranche: '4' },
-  { id: 'journal', libelle: 'Journal', icone: 'journal', tranche: '5' },
-  { id: 'deploiements', libelle: 'Déploiements', icone: 'deploiements', tranche: '8' },
+  { id: 'accueil', libelle: 'Vue d\'ensemble', icone: 'vue-ensemble', chemin: '/', tranche: null },
+  { id: 'documentation', libelle: 'Documentation', icone: 'documentation', chemin: '/documentation', tranche: null },
+  { id: 'avancement', libelle: 'Avancement', icone: 'avancement', chemin: null, tranche: '3' },
+  { id: 'tickets', libelle: 'Tickets', icone: 'tickets', chemin: null, tranche: '4' },
+  { id: 'journal', libelle: 'Journal', icone: 'journal', chemin: null, tranche: '5' },
+  { id: 'deploiements', libelle: 'Déploiements', icone: 'deploiements', chemin: null, tranche: '8' },
 ]
+
+function estActive(chemin: string | null): boolean {
+  if (!chemin) return false
+  if (chemin === '/') return route.path === '/'
+  return route.path === chemin || route.path.startsWith(`${chemin}/`)
+}
 </script>
 
 <template>
@@ -18,11 +26,22 @@ const sections = [
 
     <ul class="entrees">
       <li v-for="section in sections" :key="section.id">
-        <span
+        <NuxtLink
+          v-if="section.chemin"
+          :to="section.chemin"
           class="entree"
-          :class="{ 'entree--active': section.tranche === null }"
-          :aria-disabled="section.tranche !== null"
-          :title="section.tranche === null ? section.libelle : `${section.libelle} — tranche ${section.tranche}, à venir`"
+          :class="{ 'entree--active': estActive(section.chemin) }"
+          :title="section.libelle"
+        >
+          <AppIcone :nom="section.icone" />
+          <span class="lecture">{{ section.libelle }}</span>
+        </NuxtLink>
+
+        <span
+          v-else
+          class="entree"
+          aria-disabled="true"
+          :title="`${section.libelle} — tranche ${section.tranche}, à venir`"
         >
           <AppIcone :nom="section.icone" />
           <span class="lecture">{{ section.libelle }}</span>
@@ -83,6 +102,7 @@ const sections = [
 
 .entree:not([aria-disabled='true']):hover {
   background: var(--c-tile);
+  color: var(--c-text);
 }
 
 .entree--sortie {
@@ -91,6 +111,7 @@ const sections = [
 
 .entree--sortie:hover {
   background: var(--c-alert-fond);
+  color: var(--c-alert);
 }
 
 /* Le design ne montre que des icônes : le libellé reste lisible par un lecteur
