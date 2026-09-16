@@ -4,6 +4,7 @@
 const CHEMINS_EXACTS = new Set([
   '/version',
   '/health',
+  '/live', // contrôle de santé du conteneur : il doit répondre sans session
   '/connexion',
   '/refus',
   '/favicon.svg',

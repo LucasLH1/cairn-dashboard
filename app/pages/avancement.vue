@@ -96,6 +96,13 @@ function lienIssue(numero: number | null): string | null {
               >
                 doc
               </NuxtLink>
+              <NuxtLink
+                class="lien"
+                :to="`/tickets?module=module/${module.id}`"
+                :title="`Tickets du module ${module.id}`"
+              >
+                tickets
+              </NuxtLink>
               <a
                 v-if="lienIssue(module.issue)"
                 class="lien"

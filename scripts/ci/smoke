@@ -86,6 +86,10 @@ echo "== /health répond 200"
 verifier_code /health 200 "/health"
 echo "   $(cat /tmp/smoke-corps)"
 
+echo "== /live répond 200"
+verifier_code /live 200 "/live"
+echo "   $(cat /tmp/smoke-corps)"
+
 echo "== sans session, la porte est fermée"
 verifier_code / 302 "page d'accueil"
 CIBLE=$(curl -s -o /dev/null -m 10 -w '%{redirect_url}' "${BASE}/")
@@ -132,6 +136,13 @@ echo "== dépendance coupée : /health répond 503"
 demarrer "jeton-invalide-pour-l-epreuve"
 attendre
 verifier_code /health 503 "/health"
+echo "   $(cat /tmp/smoke-corps)"
+
+# Le garde-fou du contrôle de santé du conteneur : GitHub est hors jeu, le
+# service n'est pas utilisable — mais le processus, lui, répond. Si /live
+# tombait ici, une panne chez GitHub ferait redémarrer le conteneur en boucle.
+echo "== /live tient malgré la dépendance coupée"
+verifier_code /live 200 "/live"
 echo "   $(cat /tmp/smoke-corps)"
 
 echo "== image éprouvée"

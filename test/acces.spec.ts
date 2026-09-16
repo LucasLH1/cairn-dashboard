@@ -7,6 +7,12 @@ describe('cheminPublic', () => {
     expect(cheminPublic('/health')).toBe(true)
   })
 
+  it('laisse passer le contrôle de santé du conteneur', () => {
+    // Sans cela, le contrôle exigerait une session : il échouerait toujours, et
+    // le conteneur serait déclaré malade en permanence.
+    expect(cheminPublic('/live')).toBe(true)
+  })
+
   it('laisse passer le parcours de connexion et ses écrans', () => {
     expect(cheminPublic('/connexion')).toBe(true)
     expect(cheminPublic('/refus')).toBe(true)
@@ -27,6 +33,7 @@ describe('cheminPublic', () => {
     expect(cheminPublic('/documentation')).toBe(false)
     expect(cheminPublic('/versionnage')).toBe(false)
     expect(cheminPublic('/health-check')).toBe(false)
+    expect(cheminPublic('/livraison')).toBe(false)
     expect(cheminPublic('/connexion/../interne')).toBe(false)
   })
 })

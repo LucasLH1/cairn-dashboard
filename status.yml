@@ -55,13 +55,13 @@ tranches:
 
   - id: "3"
     nom: Avancement à partir du status.yml de cairn-wms
-    etat: en développement
+    etat: livré
     issue: 3
     label: tranche/3-avancement
 
   - id: "4"
     nom: "Tickets : liste, filtres, création"
-    etat: à faire
+    etat: en développement
     issue: 4
     label: tranche/4-tickets
 

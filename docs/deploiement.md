@@ -102,3 +102,29 @@ request, pas sur `main`. D'où les règles suivantes, pour ce dépôt :
   déployer.
 - **Le dépôt n'autorise que « Create a merge commit »** : squash et rebase sont désactivés. Sans cela,
   la fusion produirait un commit sans second parent, et la règle ci-dessus n'aurait plus de sens.
+
+## 7. Complément du 2026-09-16 — `/live`, contrôle de santé du conteneur
+
+Le contrat du §2 ne connaissait que `/version` et `/health`. La tranche 3 a rendu `/health`
+dépendant de GitHub : il éprouve désormais une lecture réelle de contenu, et passe à 503 si GitHub
+est refusé, injoignable ou à court de quota. C'est voulu pour le **déploiement**, qui doit refuser
+de déclarer le succès quand le service n'est pas utilisable.
+
+Mais le contrôle de santé du **conteneur** ne peut pas dépendre de cette même sonde : une panne chez
+GitHub ferait déclarer le conteneur malade et provoquerait des redémarrages qui n'y changeraient
+rien. Une panne d'un tiers deviendrait une panne d'hébergement.
+
+Le contrat s'enrichit donc d'une troisième route, publique comme les deux autres :
+
+| Route | Ce qu'elle dit | Qui s'en sert |
+|---|---|---|
+| `/version` | quel SHA est servi | le déploiement |
+| `/health` | le service est-il **utilisable**, dépendances comprises | le déploiement, la supervision |
+| `/live` | ce **processus** répond-il | le contrôle de santé du conteneur |
+
+`/live` ne dépend de rien d'extérieur : ni GitHub, ni la configuration de la connexion. Le
+`HEALTHCHECK` de l'image le vise depuis cette date.
+
+**Côté Coolify** : si un « Health Check » propre à l'application y est activé, son chemin doit être
+`/live`, jamais `/health`. Sans réglage explicite, Coolify laisse agir le `HEALTHCHECK` de l'image,
+qui est déjà correct — c'est l'état constaté le 2026-09-16 sur le conteneur en production.
