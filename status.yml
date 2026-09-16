@@ -43,13 +43,13 @@ tranches:
 
   - id: "1c"
     nom: Conformité visuelle du socle
-    etat: en développement
+    etat: livré
     issue: 13
     label: tranche/1c-conformite-visuelle
 
   - id: "2"
     nom: Consultation de la doc de cairn-wms
-    etat: à faire
+    etat: en développement
     issue: 2
     label: tranche/2-doc
 

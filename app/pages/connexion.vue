@@ -19,7 +19,7 @@ const erreur = computed(() => {
 <template>
   <PanneauAcces>
     <section class="carte">
-      <AppMarque :taille="34" />
+      <AppMarque class="marque" :taille="34" />
 
       <div class="titres">
         <h2>Connexion</h2>
@@ -52,6 +52,14 @@ const erreur = computed(() => {
   background: var(--c-card);
   box-shadow: var(--sh-frame);
   text-align: center;
+}
+
+/* Le panneau porte déjà la marque : dans la carte, elle ne sert qu'en étroit,
+   où la carte se retrouve seule sous le panneau. */
+@media (min-width: 861px) {
+  .marque {
+    display: none;
+  }
 }
 
 .titres {

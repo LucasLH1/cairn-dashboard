@@ -10,6 +10,7 @@ défaire à bon compte, et dont quelqu'un — dans six mois, ou six ans — voud
 | [0001](0001-pile-du-dashboard.md) | Pile du dashboard | Langage, framework, persistance, accès à GitHub, connecteur MCP, contrôle d'accès. |
 | [0002](0002-hebergement-sur-coolify.md) | Hébergement sur Coolify | Où et par quoi le dashboard est mis en service. |
 | [0003](0003-dashboard-un-seul-environnement.md) | Dashboard : un seul environnement, production | Combien d'environnements, et ce qui déclenche la mise en production. |
+| [0004](0004-rendu-du-markdown.md) | Rendu du Markdown de cairn-wms | Avec quoi la documentation est rendue en HTML, et comment le HTML brut est neutralisé. |
 
 Ces décisions n'engagent que le dashboard. Elles ne tranchent rien pour cairn-wms, dont les choix se
 font dans son propre dépôt — et réciproquement.
