@@ -21,8 +21,8 @@ useHead({ title: 'Cairn Dashboard — accès refusé' })
   display: grid;
   place-items: center;
   min-height: 100vh;
-  padding: var(--sp-5);
-  background: var(--c-window);
+  padding: var(--sp-frame);
+  background: var(--g-page);
 }
 
 .carte {
@@ -35,17 +35,20 @@ useHead({ title: 'Cairn Dashboard — accès refusé' })
   border: 1px solid var(--c-border);
   border-radius: var(--r-card);
   background: var(--c-card);
+  box-shadow: var(--sh-frame);
   text-align: center;
 }
 
+/* Même carré encadré que la marque, dans la couleur d'alerte du design */
 .marque {
   display: grid;
   place-items: center;
   width: 34px;
   height: 34px;
-  border-radius: var(--r-tile);
-  background: var(--c-alert);
-  color: #ffffff;
+  border: 1px solid var(--c-alert);
+  border-radius: var(--r-rail);
+  background: var(--c-alert-fond);
+  color: var(--c-alert);
   font-size: var(--fs-lg);
 }
 

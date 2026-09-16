@@ -1,6 +1,7 @@
 <script setup lang="ts">
-// Sélecteur sombre / clair du design. Le choix reste sur le poste du visiteur :
-// rien n'est envoyé au serveur, aucune donnée n'est conservée ailleurs.
+// Sélecteur sombre / clair du design : deux pastilles dans une pilule, sans
+// libellé écrit. Le choix reste sur le poste du visiteur : rien n'est envoyé au
+// serveur, aucune donnée n'est conservée ailleurs.
 type Theme = 'dark' | 'light'
 
 const theme = ref<Theme | null>(null)
@@ -41,20 +42,22 @@ onMounted(() => {
       class="choix"
       :class="{ 'choix--actif': theme === 'dark' }"
       :aria-pressed="theme === 'dark'"
+      title="Sombre"
       @click="appliquer('dark')"
     >
       <span aria-hidden="true">☾</span>
-      <span class="texte">Sombre</span>
+      <span class="lecture">Sombre</span>
     </button>
     <button
       type="button"
       class="choix"
       :class="{ 'choix--actif': theme === 'light' }"
       :aria-pressed="theme === 'light'"
+      title="Clair"
       @click="appliquer('light')"
     >
       <span aria-hidden="true">☀</span>
-      <span class="texte">Clair</span>
+      <span class="lecture">Clair</span>
     </button>
   </div>
 </template>
@@ -62,33 +65,38 @@ onMounted(() => {
 <style scoped>
 .bascule {
   display: flex;
-  gap: 3px;
-  padding: 3px;
-  border: 1px solid var(--c-border);
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
   border-radius: var(--r-pill);
   background: var(--c-tile);
 }
 
 .choix {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-1);
-  padding: 3px var(--sp-3);
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
   border: 0;
-  border-radius: var(--r-pill);
+  border-radius: 50%;
   background: transparent;
   color: var(--c-muted);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-base);
 }
 
 .choix--actif {
-  background: var(--c-card);
+  background: var(--c-bascule);
+  box-shadow: var(--sh-bascule);
   color: var(--c-text);
 }
 
-@media (max-width: 640px) {
-  .texte {
-    display: none;
-  }
+.lecture {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 </style>

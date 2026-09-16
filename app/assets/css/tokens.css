@@ -31,9 +31,24 @@
   --c-alert-soft: #f07268;
   --c-warn: #dda145;
 
+  /* Teintes portées du design : la marque encadrée, et le survol de sortie */
+  --c-marque-bord: rgba(94, 130, 220, 0.4);
+  --c-marque-fond: rgba(94, 130, 220, 0.12);
+  --c-alert-fond: rgba(226, 85, 74, 0.14);
+
+  /* Pastille active du sélecteur de thème : plus claire que la tuile qui la porte */
+  --c-bascule: #2b2f34;
+  --sh-bascule: none;
+
+  /* Fond de page et ombre du cadre applicatif */
+  --g-page: radial-gradient(900px 520px at 50% -10%, #1d1f22, #101113 60%, #0b0c0d);
+  --sh-frame: 0 40px 90px rgba(0, 0, 0, 0.5);
+
   /* Rayons */
-  --r-card: 11px;
+  --r-frame: 18px;
+  --r-card: 14px;
   --r-tile: 10px;
+  --r-rail: 9px;
   --r-chip: 7px;
   --r-pill: 99px;
 
@@ -45,17 +60,24 @@
   --sp-5: 14px;
   --sp-6: 18px;
 
-  /* Tailles de texte */
+  /* Tailles de texte — l'échelle du design, du secondaire au nombre mis en avant */
   --fs-xs: 11px;
   --fs-sm: 11.5px;
   --fs-md: 12.5px;
   --fs-base: 13px;
   --fs-lg: 14px;
+  --fs-card: 16px;
   --fs-xl: 17px;
+  --fs-title: 22px;
+  --fs-number: 31px;
 
   /* Ossature */
-  --h-header: 64px;
+  --h-header: 62px;
   --w-rail: 64px;
+  --w-entree: 34px;
+  --sp-frame: 14px;
+  --sp-contenu: 12px;
+  --sp-grille: 10px;
 
   --font-sans: 'DM Sans', system-ui, sans-serif;
   --font-mono: ui-monospace, monospace;
@@ -75,6 +97,15 @@
   --c-text: #1a1c1f;
   --c-muted: #6b7178;
   --c-dim: #8b9199;
+
+  /* Le design ne donne pas de fond de page clair : ses maquettes gardent un
+     pourtour sombre, qui est le décor de la vitrine, pas un jeton de thème.
+     On le rebâtit avec les couleurs claires du design (règle 7). */
+  --g-page: radial-gradient(900px 520px at 50% -10%, #ffffff, #f2f3f5 60%, #e7e8ec);
+  --sh-frame: 0 40px 90px rgba(16, 18, 24, 0.12);
+
+  --c-bascule: #ffffff;
+  --sh-bascule: 0 1px 3px rgba(0, 0, 0, 0.14);
 }
 
 @media (prefers-color-scheme: light) {
@@ -91,5 +122,11 @@
     --c-text: #1a1c1f;
     --c-muted: #6b7178;
     --c-dim: #8b9199;
+
+    --g-page: radial-gradient(900px 520px at 50% -10%, #ffffff, #f2f3f5 60%, #e7e8ec);
+    --sh-frame: 0 40px 90px rgba(16, 18, 24, 0.12);
+
+    --c-bascule: #ffffff;
+    --sh-bascule: 0 1px 3px rgba(0, 0, 0, 0.14);
   }
 }

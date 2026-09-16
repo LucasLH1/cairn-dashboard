@@ -19,7 +19,7 @@ const erreur = computed(() => {
 <template>
   <main class="ecran">
     <section class="carte">
-      <span class="marque" aria-hidden="true">◈</span>
+      <AppMarque :taille="34" />
       <h1>Cairn Dashboard</h1>
       <p class="mention">Suivi du projet Cairn WMS</p>
 
@@ -37,8 +37,8 @@ const erreur = computed(() => {
   display: grid;
   place-items: center;
   min-height: 100vh;
-  padding: var(--sp-5);
-  background: var(--c-window);
+  padding: var(--sp-frame);
+  background: var(--g-page);
 }
 
 .carte {
@@ -51,23 +51,13 @@ const erreur = computed(() => {
   border: 1px solid var(--c-border);
   border-radius: var(--r-card);
   background: var(--c-card);
+  box-shadow: var(--sh-frame);
   text-align: center;
-}
-
-.marque {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--r-tile);
-  background: var(--c-accent);
-  color: #ffffff;
-  font-size: var(--fs-lg);
 }
 
 .mention {
   color: var(--c-muted);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md);
 }
 
 .erreur {

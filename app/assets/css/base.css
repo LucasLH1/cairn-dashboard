@@ -31,11 +31,11 @@ h3 {
 }
 
 h1 {
-  font-size: var(--fs-xl);
+  font-size: var(--fs-title);
 }
 
 h2 {
-  font-size: var(--fs-lg);
+  font-size: var(--fs-card);
 }
 
 h3 {
