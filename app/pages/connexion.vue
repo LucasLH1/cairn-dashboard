@@ -17,30 +17,29 @@ const erreur = computed(() => {
 </script>
 
 <template>
-  <main class="ecran">
+  <PanneauAcces>
     <section class="carte">
       <AppMarque :taille="34" />
-      <h1>Cairn Dashboard</h1>
-      <p class="mention">Suivi du projet Cairn WMS</p>
+
+      <div class="titres">
+        <h2>Connexion</h2>
+        <p class="mention">Par votre compte GitHub.</p>
+      </div>
 
       <p v-if="erreur" class="erreur" role="alert">{{ erreur }}</p>
 
       <a class="bouton" href="/auth/github">Se connecter avec GitHub</a>
 
-      <p class="note">Ce site est réservé à un seul compte.</p>
+      <span class="filet" />
+
+      <p class="note">
+        Ce site est réservé à un seul compte. Toute autre identité est refusée.
+      </p>
     </section>
-  </main>
+  </PanneauAcces>
 </template>
 
 <style scoped>
-.ecran {
-  display: grid;
-  place-items: center;
-  min-height: 100vh;
-  padding: var(--sp-frame);
-  background: var(--g-page);
-}
-
 .carte {
   display: flex;
   flex-direction: column;
@@ -53,6 +52,12 @@ const erreur = computed(() => {
   background: var(--c-card);
   box-shadow: var(--sh-frame);
   text-align: center;
+}
+
+.titres {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
 }
 
 .mention {
@@ -74,15 +79,23 @@ const erreur = computed(() => {
   margin-top: var(--sp-2);
   padding: var(--sp-3) var(--sp-4);
   border-radius: var(--r-tile);
-  background: var(--c-accent);
+  background: var(--g-accent);
+  box-shadow: var(--sh-accent);
   color: #ffffff;
   font-size: var(--fs-base);
   font-weight: 600;
 }
 
 .bouton:hover {
-  background: var(--c-accent-soft);
+  filter: brightness(1.06);
   color: #ffffff;
+}
+
+.filet {
+  width: 100%;
+  height: 1px;
+  margin-top: var(--sp-2);
+  background: var(--c-border);
 }
 
 .note {
