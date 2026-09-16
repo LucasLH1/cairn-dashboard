@@ -224,8 +224,13 @@ Arbitrages validés en séance :
 
 ## Points ouverts
 
-- Désactiver l'indexation du domaine du dashboard dans Coolify : le réglage annoncé n'est pas
-  enregistré.
+- Préparatifs de la tranche 1a faits et vérifiés le lendemain : indexation du domaine désormais
+  désactivée, déploiements de prévisualisation désactivés, jeton d'accès à Coolify créé avec les
+  droits exacts, environnement de déploiement et ses secrets en place, variables de l'application
+  saisies pour l'exécution seule. Rien n'est déployé.
+- **À trancher avant la tranche 1a** : l'environnement de déploiement n'autorise qu'une seule
+  branche, alors que la fusion d'une pull request exécute le workflow sur la référence de cette
+  pull request. Le déploiement serait refusé en l'état.
 - Le plan de mise au propre du serveur est terminé. Reste la préparation propre à la tranche 1a :
   jeton d'API de Coolify, secrets de déploiement, et publication de l'image du dashboard.
 - Aucun jeton d'API Coolify n'existe plus : celui du dashboard reste à créer par Lucas.
