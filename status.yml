@@ -37,7 +37,7 @@ tranches:
 
   - id: "1b"
     nom: Connexion GitHub restreinte au compte LucasLH1
-    etat: à faire
+    etat: en développement
     issue: 9
     label: tranche/1b-connexion-github
 
