@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Contrôles statiques. Appelé par qualite.yml, qui ne connaît pas la pile.
+set -euo pipefail
+cd "$(dirname "$0")/../.."
+
+echo "== eslint"
+npm run --silent lint
+
+echo "== typage"
+npm run --silent typecheck

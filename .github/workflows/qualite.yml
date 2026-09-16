@@ -1,0 +1,38 @@
+# Contrôles bloquants — docs/deploiement.md §1 et §3.
+# Le workflow appelle des scripts à noms fixes et ne connaît pas la pile.
+name: qualité
+
+on:
+  push:
+    branches: [dev]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: qualite-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  controles:
+    name: Contrôles
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm ci --no-audit --no-fund
+
+      - name: Contrôles statiques
+        run: scripts/ci/lint
+
+      - name: Tests
+        run: scripts/ci/test

@@ -1,0 +1,171 @@
+# Déploiement — docs/deploiement.md §3 et §6, fiche 0003 et son complément.
+# Aucune reconstruction : on désigne une image déjà construite et éprouvée sur dev.
+name: déploiement
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: SHA à déployer (40 caractères, image déjà publiée)
+        required: true
+        type: string
+      environnement:
+        description: Environnement
+        required: true
+        default: production
+        type: choice
+        options: [production]
+
+concurrency:
+  group: deploiement-${{ inputs.environnement || 'production' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  deployer:
+    name: Déployer
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environnement || 'production' }}
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Déterminer le SHA à déployer
+        id: cible
+        env:
+          EVENEMENT: ${{ github.event_name }}
+          SHA_POUSSE: ${{ github.sha }}
+          SHA_DEMANDE: ${{ inputs.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENEMENT" = "workflow_dispatch" ]; then
+            SHA="$SHA_DEMANDE"
+            echo "SHA demandé à la main."
+          else
+            if ! git rev-parse --verify --quiet "${SHA_POUSSE}^2" >/dev/null; then
+              echo "::error::Le commit poussé n'est pas un commit de fusion : il n'a pas de second parent, donc aucune image éprouvée à déployer. Le dépôt ne doit autoriser que « Create a merge commit » (docs/deploiement.md §6)."
+              exit 1
+            fi
+            SHA="$(git rev-parse "${SHA_POUSSE}^2")"
+            echo "Second parent du commit de fusion, soit la tête de dev."
+          fi
+          if ! printf '%s' "$SHA" | grep -qE '^[0-9a-f]{40}$'; then
+            echo "::error::SHA invalide : « $SHA »."
+            exit 1
+          fi
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "À déployer : $SHA"
+
+      - name: Calculer le nom de l'image, en minuscules
+        id: nom
+        run: echo "image=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+
+      - name: Se connecter au registre
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Vérifier que l'image du SHA existe
+        env:
+          IMAGE: ${{ steps.nom.outputs.image }}:${{ steps.cible.outputs.sha }}
+        run: |
+          set -uo pipefail
+          if docker manifest inspect "$IMAGE" >/dev/null 2>erreur.txt; then
+            echo "Image présente : $IMAGE"
+            exit 0
+          fi
+          if grep -qiE 'denied|unauthorized|forbidden' erreur.txt; then
+            echo "::error::Accès refusé au registre pour $IMAGE. Vérifier la visibilité du paquet et les droits du jeton."
+          else
+            echo "::error::Image absente pour ce SHA : le commit n'est pas passé par dev. On enquête, on ne reconstruit pas (docs/deploiement.md §1)."
+          fi
+          sed -n '1,5p' erreur.txt
+          exit 1
+
+      - name: Pointer l'application Coolify sur cette image
+        env:
+          COOLIFY_URL: ${{ secrets.COOLIFY_URL }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+          COOLIFY_APP_UUID: ${{ secrets.COOLIFY_APP_UUID }}
+          IMAGE_NOM: ${{ steps.nom.outputs.image }}
+          SHA: ${{ steps.cible.outputs.sha }}
+        run: |
+          set -euo pipefail
+          code=$(curl -sS -o reponse.json -w '%{http_code}' \
+            -X PATCH "${COOLIFY_URL%/}/api/v1/applications/${COOLIFY_APP_UUID}" \
+            -H "Authorization: Bearer ${COOLIFY_TOKEN}" \
+            -H 'Content-Type: application/json' \
+            -d "{\"docker_registry_image_name\":\"${IMAGE_NOM}\",\"docker_registry_image_tag\":\"${SHA}\"}")
+          echo "Réponse : $code — $(jq -r '.message // "sans message"' reponse.json 2>/dev/null || echo 'corps illisible')"
+          if [ "$code" != "200" ] && [ "$code" != "201" ]; then
+            echo "::error::Coolify a refusé la mise à jour de l'étiquette d'image (code $code)."
+            exit 1
+          fi
+
+      - name: Déclencher le déploiement
+        env:
+          COOLIFY_URL: ${{ secrets.COOLIFY_URL }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+          COOLIFY_APP_UUID: ${{ secrets.COOLIFY_APP_UUID }}
+        run: |
+          set -euo pipefail
+          code=$(curl -sS -o deploiement.json -w '%{http_code}' \
+            -X POST "${COOLIFY_URL%/}/api/v1/deploy?uuid=${COOLIFY_APP_UUID}&force=false" \
+            -H "Authorization: Bearer ${COOLIFY_TOKEN}" \
+            -H 'Accept: application/json')
+          echo "Réponse : $code — $(jq -r '.deployments[0].message // .message // "sans message"' deploiement.json 2>/dev/null || echo 'corps illisible')"
+          if [ "$code" != "200" ] && [ "$code" != "201" ]; then
+            echo "::error::Coolify a refusé le déclenchement du déploiement (code $code)."
+            exit 1
+          fi
+
+      - name: Attendre que /version serve ce SHA
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          SHA: ${{ steps.cible.outputs.sha }}
+        run: |
+          set -uo pipefail
+          for essai in $(seq 1 60); do
+            vu=$(curl -sf -m 10 "${APP_URL%/}/version" | jq -r '.commit // empty' 2>/dev/null || true)
+            if [ "$vu" = "$SHA" ]; then echo "/version sert le SHA déployé après ${essai} essai(s)."; exit 0; fi
+            sleep 10
+          done
+          echo "::error::/version ne sert toujours pas $SHA après dix minutes. Dernière valeur vue : « ${vu:-aucune} »."
+          exit 1
+
+      - name: Attendre que /health réponde 200
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+        run: |
+          set -uo pipefail
+          for essai in $(seq 1 30); do
+            code=$(curl -s -o sante.json -m 10 -w '%{http_code}' "${APP_URL%/}/health" || true)
+            if [ "$code" = "200" ]; then
+              echo "/health à 200 après ${essai} essai(s) : $(jq -c '.' sante.json 2>/dev/null || cat sante.json)"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::/health n'est pas à 200 après cinq minutes (dernier code ${code:-aucun}) : $(cat sante.json 2>/dev/null)."
+          exit 1
+
+      - name: Récapitulatif
+        if: always()
+        run: |
+          {
+            echo "### Déploiement"
+            echo
+            echo "- SHA déployé : \`${{ steps.cible.outputs.sha }}\`"
+            echo "- Image : \`${{ steps.nom.outputs.image }}\`"
+            echo "- Déclencheur : \`${{ github.event_name }}\`"
+            echo "- Résultat : ${{ job.status }}"
+          } >> "$GITHUB_STEP_SUMMARY"

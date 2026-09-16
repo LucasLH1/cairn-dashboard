@@ -9,28 +9,61 @@ puissent lire et alimenter la documentation de cairn-wms.
 Le dashboard ne possède presque aucune donnée : **il lit et écrit dans GitHub**. cairn-wms reste la
 source de vérité ; le dashboard n'en est qu'une interface.
 
-Ce dépôt est **public**. À ce stade, il ne contient aucun code applicatif : la pile est actée dans
-`docs/decisions/`, la réalisation commence avec la tranche 1.
+Ce dépôt est **public** : aucune valeur sensible n'y figure. Les secrets vivent en variables
+d'environnement.
 
 ## Structure du dépôt
 
 | Chemin | Contenu |
 |---|---|
+| `app/` | L'interface : pages, mise en page, composants, thème. |
+| `server/` | Le serveur : routes `/version` et `/health`, utilitaires. |
+| `public/` | Fichiers servis tels quels : polices du design, favicon. |
+| `scripts/ci/` | `lint`, `test`, `smoke` — noms fixes appelés par les workflows. |
+| `.github/workflows/` | `qualite.yml`, `image.yml`, `deploiement.yml`. |
 | `docs/cadrage.md` | Finalité, périmètre et principes du dashboard. |
-| `docs/deploiement.md` | Logique d'intégration et de déploiement, indépendante de toute pile. |
+| `docs/deploiement.md` | Logique d'intégration et de déploiement. |
 | `docs/decisions/` | Les décisions engageantes, une fiche par décision. |
-| `journal/` | Une entrée par session de travail : ce qui a été fait, décidé, touché. |
+| `design/` | Le design de référence, exporté de Claude Design. |
+| `journal/` | Une entrée par session de travail. |
 | `status.yml` | L'état d'avancement de chaque tranche. |
 | `CLAUDE.md` | Les règles de travail dans ce dépôt. |
 
+## Mise en route
+
+```sh
+npm install
+cp .env.example .env   # puis renseigner les valeurs, le fichier n'est pas suivi
+npm run dev            # http://localhost:3000
+```
+
+Contrôles, identiques à ceux de l'intégration :
+
+```sh
+scripts/ci/lint        # eslint et typage
+scripts/ci/test        # tests unitaires
+docker compose build   # image, avec APP_COMMIT
+scripts/ci/smoke cairn-dashboard:local "$(git rev-parse HEAD)"
+```
+
+## Contrat de service
+
+| Route | Réponse |
+|---|---|
+| `/version` | `{"commit": "<sha>"}` — le SHA inscrit dans l'image à sa construction. |
+| `/health` | `200` si les dépendances répondent, `503` sinon. |
+
 ## Avancement
 
-Huit tranches, livrées l'une après l'autre en découpage vertical : chacune est utilisable de bout en
-bout avant que la suivante commence. L'état de chacune se lit dans `status.yml`.
+Le dashboard se livre par tranches, l'une après l'autre, en découpage vertical : chacune est
+utilisable de bout en bout, en ligne, avant que la suivante commence. Leur liste, leur ordre et leur
+état se lisent dans `status.yml`.
 
 ## Mise en service
 
 Adresse : **monitoring.cairn-wms.fr**. Un seul environnement, la production, hébergé sur Coolify.
+L'image est construite et éprouvée sur `dev`, puis déployée à la fusion de la pull request vers
+`main`, sans être reconstruite.
 
 ## Branches
 

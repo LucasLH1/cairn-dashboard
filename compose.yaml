@@ -1,0 +1,17 @@
+# Pile du poste et de l'intégration — docs/deploiement.md §2, principe 6 :
+# même fichier compose, même configuration d'exemple, pour éviter le « vert chez
+# moi, rouge en CI ». La production, elle, passe par Coolify.
+
+services:
+  dashboard:
+    build:
+      context: .
+      args:
+        APP_COMMIT: ${APP_COMMIT:-local}
+    image: ${IMAGE:-cairn-dashboard:local}
+    environment:
+      APP_COMMIT: ${APP_COMMIT:-local}
+      NUXT_GITHUB_TOKEN: ${NUXT_GITHUB_TOKEN:-}
+      NUXT_GITHUB_REPO: ${NUXT_GITHUB_REPO:-}
+    ports:
+      - '${PORT:-3000}:3000'

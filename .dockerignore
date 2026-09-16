@@ -1,0 +1,16 @@
+.git
+.github
+.nuxt
+.output
+.data
+node_modules
+coverage
+design
+docs
+journal
+test
+*.md
+.env
+.env.*
+!.env.example
+compose.yaml
