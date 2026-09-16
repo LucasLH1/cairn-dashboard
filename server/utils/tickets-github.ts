@@ -16,16 +16,19 @@ import type { Brouillon, Ticket } from './tickets'
 /** Ce que le dashboard sait faire des tickets. Rien de plus. */
 export interface ClientTickets {
   labels: () => Promise<string[]>
+  jalons: () => Promise<Array<{ numero: number, titre: string }>>
   tickets: () => Promise<Ticket[]>
-  creer: (brouillon: Brouillon) => Promise<{ numero: number, url: string }>
+  creer: (brouillon: Brouillon, jalonNumero?: number | null) => Promise<{ numero: number, url: string }>
 }
 
 const cacheLabels = creerCache<string[]>()
+const cacheJalons = creerCache<Array<{ numero: number, titre: string }>>()
 const cacheTickets = creerCache<Ticket[]>()
 
 /** Pour les tests, et après chaque création. */
 export function viderCachesTickets(): void {
   cacheLabels.vider()
+  cacheJalons.vider()
   cacheTickets.vider()
 }
 
@@ -62,6 +65,7 @@ export interface OctokitTickets {
   rest: {
     issues: {
       listLabelsForRepo: (args: Record<string, unknown>) => Promise<ReponseGithub<Array<{ name?: unknown }>>>
+      listMilestones: (args: Record<string, unknown>) => Promise<ReponseGithub<Array<{ number?: unknown, title?: unknown }>>>
       listForRepo: (args: Record<string, unknown>) => Promise<ReponseGithub<unknown[]>>
       create: (args: Record<string, unknown>) => Promise<ReponseGithub<{ number: unknown, html_url: unknown }>>
     }
@@ -110,6 +114,39 @@ export function creerClientTickets(
       return valeur
     },
 
+    async jalons() {
+      const { valeur } = await servir<Array<{ numero: number, titre: string }>>(
+        cacheJalons,
+        `${depot}:jalons`,
+        async (etag) => {
+          try {
+            const reponse = await octokit.rest.issues.listMilestones({
+              owner,
+              repo,
+              state: 'all',
+              per_page: 100,
+              headers: entete(etag),
+            })
+            noter('jalons', reponse.status, reponse.headers)
+            return {
+              modifie: true as const,
+              valeur: reponse.data.map(j => ({ numero: Number(j.number), titre: String(j.title) })),
+              etag: String(reponse.headers.etag ?? '') || null,
+            }
+          }
+          catch (erreur) {
+            const statut = (erreur as { status?: number })?.status
+            if (statut !== undefined) {
+              noter('jalons', statut, (erreur as { response?: { headers?: unknown } })?.response?.headers)
+            }
+            if (estNonModifie(erreur)) return { modifie: false as const }
+            throw erreur
+          }
+        },
+      )
+      return valeur
+    },
+
     async tickets() {
       const { valeur } = await servir<Ticket[]>(cacheTickets, `${depot}:tickets`, async (etag) => {
         try {
@@ -142,13 +179,16 @@ export function creerClientTickets(
       return valeur
     },
 
-    async creer(brouillon: Brouillon) {
+    async creer(brouillon: Brouillon, jalonNumero?: number | null) {
       const reponse = await octokit.rest.issues.create({
         owner,
         repo,
         title: brouillon.titre,
         ...(brouillon.corps === '' ? {} : { body: brouillon.corps }),
         ...(brouillon.labels.length === 0 ? {} : { labels: brouillon.labels }),
+        // Le jalon range le ticket dans la couche à laquelle son module
+        // appartient, comme cairn-wms le fait pour les siens.
+        ...(jalonNumero === undefined || jalonNumero === null ? {} : { milestone: jalonNumero }),
       })
 
       noter('création', reponse.status, reponse.headers)

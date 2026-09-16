@@ -1,11 +1,15 @@
 <script setup lang="ts">
 // Tickets de cairn-wms — tranche 4.
 //
-// La création est la première écriture du dashboard. Elle est bornée : titre
-// obligatoire, corps facultatif, et **uniquement des labels qui existent déjà**
-// dans cairn-wms — le dashboard n'en crée pas.
+// La création est la première écriture du dashboard, et elle est **guidée** :
+// on choisit une nature et un module, le reste se déduit. Le label de couche et
+// le jalon viennent du module, pour que tout ticket créé se range comme
+// cairn-wms range les siens — et l'aperçu montre, avant l'envoi, ce qui sera
+// réellement posé.
 import { MESSAGES } from '~~/server/utils/echec-doc'
 import { ECHECS_CREATION, filtrer, REFUS } from '~~/server/utils/tickets'
+import { deduire, REFUS_COHERENCE } from '~~/server/utils/organisation'
+import type { Nature, Organisation } from '~~/server/utils/organisation'
 import type { EchecCreation, Familles, Filtres, RefusCreation, Ticket } from '~~/server/utils/tickets'
 import type { EchecDoc } from '~~/server/utils/doc-github'
 
@@ -19,13 +23,16 @@ const { data, refresh } = await useFetch<{
   familles?: Familles
   labels?: string[]
   tickets?: Ticket[]
+  organisation?: Organisation | null
   echec?: EchecDoc
 }>('/api/tickets', { default: () => ({}) })
 
 const echec = computed(() => data.value?.echec ?? null)
 const familles = computed<Familles>(() => data.value?.familles ?? { couches: [], modules: [], types: [] })
+const organisation = computed(() => data.value?.organisation ?? null)
 
-// Le filtre par module peut venir de l'écran d'avancement.
+// — Liste et filtres ————————————————————————————————————————
+
 const filtres = reactive<Filtres>({
   etat: 'open',
   couche: null,
@@ -39,18 +46,30 @@ function court(label: string): string {
   return label.replace(/^(couche|module)\//, '')
 }
 
-// — Création ———————————————————————————————————————————————
+// — Création guidée —————————————————————————————————————————
 
-/** Une intention par formulaire : deux envois de la même n'écrivent qu'une fois. */
 function nouvelleIntention(): string {
   return globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(16)}${Math.random().toString(16).slice(2, 14)}`
 }
 
-const brouillon = reactive({ titre: '', corps: '', labels: [] as string[] })
+const brouillon = reactive({
+  titre: '',
+  corps: '',
+  nature: 'tech' as Nature,
+  module: '' as string,
+})
+
 const intention = ref(nouvelleIntention())
 const envoiEnCours = ref(false)
-const cree = ref<{ numero: number, url: string } | null>(null)
+const cree = ref<{ numero: number, url: string, labels: string[], jalon: string | null } | null>(null)
 const refus = ref<string | null>(null)
+
+/** Ce qui sera posé : calculé ici pour l'aperçu, recalculé et vérifié par le serveur. */
+const apercu = computed(() => {
+  const org = organisation.value
+  if (!org) return null
+  return deduire(brouillon.nature, brouillon.module === '' ? null : brouillon.module, org)
+})
 
 async function creer() {
   if (envoiEnCours.value) return
@@ -61,33 +80,48 @@ async function creer() {
     const reponse = await $fetch<{
       numero?: number
       url?: string
-      echec?: string
-      refus?: RefusCreation
-      detail?: string
+      labels?: string[]
+      jalon?: string | null
     }>('/api/tickets', {
       method: 'POST',
-      body: { ...brouillon, intention: intention.value },
+      body: {
+        titre: brouillon.titre,
+        corps: brouillon.corps,
+        nature: brouillon.nature,
+        module: brouillon.module === '' ? null : brouillon.module,
+        labels: apercu.value?.labels,
+        jalonNumero: apercu.value?.jalonNumero,
+        intention: intention.value,
+      },
     })
 
     if (reponse.numero && reponse.url) {
-      cree.value = { numero: reponse.numero, url: reponse.url }
+      cree.value = {
+        numero: reponse.numero,
+        url: reponse.url,
+        labels: reponse.labels ?? [],
+        jalon: reponse.jalon ?? null,
+      }
       brouillon.titre = ''
       brouillon.corps = ''
-      brouillon.labels = []
       intention.value = nouvelleIntention()
       await refresh()
     }
   }
   catch (erreur) {
-    const donnees = (erreur as { data?: { echec?: string, refus?: RefusCreation, detail?: string } })?.data
-    if (donnees?.refus) {
-      refus.value = REFUS[donnees.refus] + (donnees.detail ? ` (« ${donnees.detail} »)` : '')
+    const d = (erreur as { data?: { echec?: string, refus?: string, detail?: string } })?.data
+
+    if (d?.echec === 'coherence' && d.refus && d.refus in REFUS_COHERENCE) {
+      refus.value = REFUS_COHERENCE[d.refus as keyof typeof REFUS_COHERENCE]
     }
-    else if (donnees?.echec === 'origine' || donnees?.echec === 'intention') {
+    else if (d?.echec === 'brouillon' && d.refus) {
+      refus.value = REFUS[d.refus as RefusCreation] + (d.detail ? ` (« ${d.detail} »)` : '')
+    }
+    else if (d?.echec === 'origine' || d?.echec === 'intention') {
       refus.value = 'La demande n\'a pas pu être vérifiée. Rechargez la page et recommencez.'
     }
-    else if (donnees?.echec && donnees.echec in ECHECS_CREATION) {
-      refus.value = ECHECS_CREATION[donnees.echec as EchecCreation].detail
+    else if (d?.echec && d.echec in ECHECS_CREATION) {
+      refus.value = ECHECS_CREATION[d.echec as EchecCreation].detail
     }
     else {
       refus.value = 'La création a échoué. Rien n\'a été écrit.'
@@ -101,21 +135,23 @@ async function creer() {
 
 <template>
   <div class="colonne">
-    <BaseCard
-      v-if="echec"
-      titre="Tickets"
-      sous-titre="Lus dans cairn-wms"
-    >
+    <BaseCard v-if="echec" titre="Tickets" sous-titre="Lus dans cairn-wms">
       <EtatEchec :titre="MESSAGES[echec].titre" :detail="MESSAGES[echec].detail" />
     </BaseCard>
 
     <template v-else>
       <BaseCard
         titre="Nouveau ticket"
-        sous-titre="Créé dans cairn-wms, avec ses labels existants"
+        sous-titre="La couche et le jalon se déduisent du module"
         mention="Écriture"
       >
-        <form class="formulaire" @submit.prevent="creer">
+        <EtatVide
+          v-if="!organisation"
+          message="Le suivi de cairn-wms n'a pas pu être lu."
+          mention="Sans lui, la couche et le jalon d'un module ne peuvent pas être déduits."
+        />
+
+        <form v-else class="formulaire" @submit.prevent="creer">
           <label class="champ">
             <span class="etiquette">Titre</span>
             <input v-model="brouillon.titre" type="text" maxlength="256" required>
@@ -126,20 +162,42 @@ async function creer() {
             <textarea v-model="brouillon.corps" rows="3" maxlength="20000" />
           </label>
 
-          <fieldset class="labels">
-            <legend class="etiquette">Labels</legend>
-            <label v-for="label in [...familles.types, ...familles.couches, ...familles.modules]" :key="label" class="puce">
-              <input v-model="brouillon.labels" type="checkbox" :value="label">
-              <span>{{ court(label) }}</span>
+          <div class="deux">
+            <label class="champ">
+              <span class="etiquette">Nature</span>
+              <select v-model="brouillon.nature">
+                <option v-for="n in organisation.natures" :key="n" :value="n">{{ n }}</option>
+              </select>
             </label>
-          </fieldset>
+
+            <label class="champ">
+              <span class="etiquette">Module</span>
+              <select v-model="brouillon.module">
+                <option value="">Aucun module</option>
+                <optgroup v-for="couche in organisation.couches" :key="couche.id" :label="couche.nom">
+                  <option v-for="m in couche.modules" :key="m.id" :value="m.id">
+                    {{ m.id }} — {{ m.nom }}
+                  </option>
+                </optgroup>
+              </select>
+            </label>
+          </div>
+
+          <div v-if="apercu" class="apercu">
+            <span class="etiquette">Ce qui sera posé</span>
+            <div class="pose">
+              <span v-for="label in apercu.labels" :key="label" class="tag tag--pose">{{ court(label) }}</span>
+              <span v-if="apercu.jalon" class="tag tag--jalon">{{ apercu.jalon }}</span>
+              <span v-else class="tag tag--vide">aucun jalon</span>
+            </div>
+          </div>
 
           <p v-if="refus" class="refus" role="alert">{{ refus }}</p>
 
           <p v-if="cree" class="confirme" role="status">
             Ticket
             <a :href="cree.url" target="_blank" rel="nofollow noopener noreferrer">#{{ cree.numero }}</a>
-            créé dans cairn-wms.
+            créé dans cairn-wms<span v-if="cree.jalon"> — jalon « {{ cree.jalon }} »</span>.
           </p>
 
           <button type="submit" class="envoyer" :disabled="envoiEnCours || brouillon.titre.trim() === ''">
@@ -211,8 +269,16 @@ async function creer() {
 
 .champ {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: var(--sp-1);
+  min-width: 0;
+}
+
+.deux {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
 }
 
 .etiquette {
@@ -225,7 +291,8 @@ async function creer() {
 }
 
 input[type='text'],
-textarea {
+textarea,
+select {
   padding: 8px var(--sp-4);
   border: 1px solid var(--c-border);
   border-radius: var(--r-tile);
@@ -233,42 +300,45 @@ textarea {
   color: var(--c-text);
   font-family: var(--font-sans);
   font-size: var(--fs-md);
+}
+
+textarea {
   resize: vertical;
 }
 
 input[type='text']:focus-visible,
-textarea:focus-visible {
+textarea:focus-visible,
+select:focus-visible {
   border-color: var(--c-info);
 }
 
-.labels {
+.apercu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-tile);
+  background: var(--c-tile);
+}
+
+.pose {
   display: flex;
   flex-wrap: wrap;
   gap: var(--sp-2);
-  margin: 0;
-  padding: 0;
-  border: 0;
 }
 
-.labels legend {
-  margin-bottom: var(--sp-2);
-  padding: 0;
-}
-
-.puce {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  padding: 4px var(--sp-3);
-  border-radius: var(--r-chip);
-  background: var(--c-tile);
-  color: var(--c-muted);
-  font-size: var(--fs-xs);
-}
-
-.puce:has(input:checked) {
+.tag--pose {
   background: var(--c-card);
   color: var(--c-text);
+}
+
+.tag--jalon {
+  background: var(--c-marque-fond);
+  color: var(--c-info);
+}
+
+.tag--vide {
+  color: var(--c-dim);
 }
 
 .envoyer {
@@ -313,13 +383,9 @@ textarea:focus-visible {
   margin-bottom: var(--sp-4);
 }
 
-select {
+.filtres select {
   padding: 6px var(--sp-3);
-  border: 1px solid var(--c-border);
   border-radius: var(--r-chip);
-  background: var(--c-tile);
-  color: var(--c-text);
-  font-family: var(--font-sans);
   font-size: var(--fs-sm);
 }
 
