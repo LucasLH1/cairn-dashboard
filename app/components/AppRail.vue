@@ -7,7 +7,7 @@ const route = useRoute()
 const sections = [
   { id: 'accueil', libelle: 'Vue d\'ensemble', icone: 'vue-ensemble', chemin: '/', tranche: null },
   { id: 'documentation', libelle: 'Documentation', icone: 'documentation', chemin: '/documentation', tranche: null },
-  { id: 'avancement', libelle: 'Avancement', icone: 'avancement', chemin: null, tranche: '3' },
+  { id: 'avancement', libelle: 'Avancement', icone: 'avancement', chemin: '/avancement', tranche: null },
   { id: 'tickets', libelle: 'Tickets', icone: 'tickets', chemin: null, tranche: '4' },
   { id: 'journal', libelle: 'Journal', icone: 'journal', chemin: null, tranche: '5' },
   { id: 'deploiements', libelle: 'Déploiements', icone: 'deploiements', chemin: null, tranche: '8' },

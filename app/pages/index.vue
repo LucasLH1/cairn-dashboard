@@ -5,8 +5,17 @@
 definePageMeta({ titre: 'Vue d\'ensemble' })
 useHead({ title: 'Cairn Dashboard — vue d\'ensemble' })
 
+// Vue d'ensemble de l'avancement de cairn-wms — tranche 3. La page d'accueil
+// n'en montre que le compte ; le détail est sur son écran.
+const { data: avancement } = await useFetch<{
+  projet?: string | null
+  compte?: { total: number, parEtat: Record<string, number>, inconnus: number }
+  echec?: string
+}>('/api/avancement', { default: () => ({}) })
+
+const ORDRE = ['à faire', 'spécifié', 'en développement', 'livré']
+
 const aVenir = [
-  { tranche: '3', texte: 'Avancement, lu dans le suivi de cairn-wms.' },
   { tranche: '4', texte: 'Tickets : liste, filtres et création.' },
   { tranche: '5', texte: 'Journal et fil d\'activité en direct.' },
   { tranche: '6', texte: 'Événements des sessions Claude Code dans le fil.' },
@@ -29,6 +38,23 @@ const aVenir = [
       <p class="second">
         La <NuxtLink to="/documentation">documentation de cairn-wms</NuxtLink> s'y
         consulte déjà, lue à la source à chaque affichage.
+      </p>
+    </BaseCard>
+
+    <BaseCard
+      v-if="avancement?.compte && !avancement?.echec"
+      :titre="avancement.projet ?? 'Cairn WMS'"
+      :sous-titre="`${avancement.compte.total} modules suivis`"
+      mention="Avancement"
+    >
+      <ul class="resume">
+        <li v-for="etat in ORDRE" :key="etat">
+          <span class="nombre">{{ avancement.compte.parEtat[etat] ?? 0 }}</span>
+          <span class="libelle">{{ etat }}</span>
+        </li>
+      </ul>
+      <p class="second">
+        <NuxtLink to="/avancement">Le détail, couche par couche</NuxtLink>
       </p>
     </BaseCard>
 
@@ -65,6 +91,40 @@ const aVenir = [
 
 .second {
   margin-top: var(--sp-3);
+}
+
+/* Vue d'ensemble de l'avancement : les nombres portent la lecture, à la taille
+   que le design réserve aux valeurs mises en avant. */
+.resume {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.resume li {
+  display: flex;
+  flex: 1 1 96px;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px var(--sp-4);
+  border-radius: var(--r-tile);
+  background: var(--c-tile);
+}
+
+.nombre {
+  color: var(--c-text);
+  font-size: var(--fs-number);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.libelle {
+  color: var(--c-muted);
+  font-size: var(--fs-sm);
 }
 
 .liste {

@@ -15,6 +15,7 @@ export function codeHttpPour(echec: EchecDoc): number {
       return 503
     case 'refuse':
     case 'injoignable':
+    case 'illisible':
       return 502
   }
 }
@@ -40,5 +41,9 @@ export const MESSAGES: Record<EchecDoc, { titre: string, detail: string }> = {
   'injoignable': {
     titre: 'GitHub injoignable',
     detail: 'Le dashboard n\'a pas pu joindre GitHub. Le service est peut-être indisponible.',
+  },
+  'illisible': {
+    titre: 'Suivi illisible',
+    detail: 'Le fichier de suivi a été lu, mais sa forme n\'est pas celle attendue. Rien n\'est affiché plutôt que de montrer un avancement deviné.',
   },
 }
