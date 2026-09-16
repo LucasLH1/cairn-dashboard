@@ -61,7 +61,7 @@ tranches:
 
   - id: "4"
     nom: "Tickets : liste, filtres, création"
-    etat: à faire
+    etat: en développement
     issue: 4
     label: tranche/4-tickets
 
