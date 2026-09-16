@@ -117,12 +117,29 @@ Le design de référence est l'export Claude Design rangé dans `design/` (voir 
 C'est une **référence**, pas du code applicatif : on n'en recopie pas le code, on en reprend les
 choix visuels.
 
-- **Imposés** : les couleurs, les polices, les espacements et les composants du design. On les
+- **Imposés** : les couleurs, les polices, les espacements et les composants du design — et avec eux
+  **l'ossature, les proportions, la hiérarchie typographique et l'aspect des composants**. On les
   reprend tels quels — ni approximation, ni variante voisine, ni « amélioration ».
-- **Indicative** : la mise en page des maquettes. Elle montre une intention, pas un plan à suivre au
-  pixel.
+- **Adaptable** : **seul l'agencement des blocs de contenu** s'écarte des maquettes, et seulement
+  pour suivre les données réelles. Combien de cartes, dans quel ordre, avec quoi dedans : oui. Leur
+  aspect, leur rayon, leurs marges, la taille de leurs titres, la largeur du rail : non.
+- **Le contenu des maquettes est fictif** (`design/README.md`). On en reprend la forme, jamais les
+  données, ni les écrans hors cadrage.
 - **Tout écart se justifie et se signale.** Il se justifie par les données réelles ou par l'usage,
   et se signale dans l'entrée de journal de la session, avec sa raison.
 - **Un composant absent du design se construit avec les mêmes briques visuelles** : ses couleurs,
   ses polices, ses espacements, ses composants existants. Pas de couleur, de police ni de taille
   inventée pour l'occasion.
+
+### La preuve visuelle fait partie de la définition de terminé
+
+Une tranche qui touche à l'interface n'est pas terminée sur parole. Elle l'est quand la comparaison
+a été faite, et montrée :
+
+- des captures de **l'application** et de **l'écran correspondant du design**, prises aux **mêmes
+  largeurs** — 1440 px pour le bureau, 390 px pour le mobile — et dans les **deux thèmes** ;
+- prises par `scripts/visuel/captures.mjs`, et jointes à l'entrée de journal de la session ;
+- **tout écart visible est justifié** dans cette entrée, ou corrigé avant de livrer.
+
+Une capture qui ne montre pas l'écart n'est pas une preuve : on capture l'écran réel, connecté, tel
+qu'il se rend — pas un montage, pas une page d'exemple.

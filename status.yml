@@ -37,9 +37,15 @@ tranches:
 
   - id: "1b"
     nom: Connexion GitHub restreinte au compte LucasLH1
-    etat: en développement
+    etat: livré
     issue: 9
     label: tranche/1b-connexion-github
+
+  - id: "1c"
+    nom: Conformité visuelle du socle
+    etat: en développement
+    issue: 13
+    label: tranche/1c-conformite-visuelle
 
   - id: "2"
     nom: Consultation de la doc de cairn-wms

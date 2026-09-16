@@ -68,3 +68,7 @@ $RECYCLE.BIN/
 tmp/
 temp/
 .cache/
+
+# Sorties de travail de l'épreuve visuelle (règle 7), à la racine seulement :
+# reproductibles. Les captures jointes au journal, elles, sont suivies.
+/captures/

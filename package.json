@@ -12,7 +12,8 @@
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",
-    "test": "vitest run"
+    "test": "vitest run",
+    "visuel": "node scripts/visuel/captures.mjs"
   },
   "dependencies": {
     "nuxt": "^4.5.2",
@@ -20,6 +21,7 @@
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.9.0",
+    "@playwright/test": "^1.63.0",
     "eslint": "^9.39.0",
     "typescript": "~5.9.3",
     "vitest": "^3.2.4",
