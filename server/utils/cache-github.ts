@@ -1,18 +1,24 @@
 // Cache court des lectures GitHub, avec requêtes conditionnelles.
 //
-// Deux raisons, et la seconde compte plus que la première :
+// Ce qui économise réellement, c'est la **fenêtre de fraîcheur** : pendant
+// trente secondes, une lecture répétée ne sort pas du serveur. Mesuré : cinq
+// lectures successives ne coûtent qu'un seul appel.
 //
-// 1. Le quota. Chaque affichage relisait GitHub ; à mesure que les tranches
-//    s'ajoutent, le même document est relu plusieurs fois par minute.
-// 2. **Une requête conditionnelle qui répond 304 ne consomme pas de quota.**
-//    On conserve donc l'ETag de chaque lecture et on le renvoie : tant que rien
-//    n'a changé à la source, la revalidation est gratuite.
+// **La revalidation par ETag, elle, n'est pas gratuite.** On a d'abord cru
+// l'inverse ; le journal des appels sortants a tranché, compteur en main :
 //
-// La durée de fraîcheur est **courte, trente secondes** : la documentation et le
-// suivi de cairn-wms changent au rythme des sessions de travail, et le cadrage
-// exige qu'une modification poussée sur `dev` soit visible sans redéployer.
-// Trente secondes bornent l'attente sans rien coûter, puisque la revalidation
-// qui suit est gratuite quand la source n'a pas bougé.
+//     [github] arbre → 200 · quota utilisé 18
+//     [github] arbre → 304 · quota utilisé 19
+//
+// Le 304 est décompté comme un appel ordinaire. L'ETag garde son intérêt — le
+// corps n'est pas retransmis, donc moins de données et une réponse plus rapide —
+// mais il n'épargne pas le quota. Toute économie de quota vient de la fenêtre.
+//
+// La durée reste **courte, trente secondes** : la documentation et le suivi de
+// cairn-wms changent au rythme des sessions de travail, et le cadrage exige
+// qu'une modification poussée sur `dev` soit visible sans redéployer. L'allonger
+// économiserait davantage, au prix de la fraîcheur — arbitrage à rouvrir si le
+// quota devenait serré, ce qu'il n'est pas à 5 000 appels par heure.
 //
 // Le cache vit en mémoire du serveur : il disparaît à chaque redéploiement, ce
 // qui est voulu — il n'est pas une donnée, seulement une économie.

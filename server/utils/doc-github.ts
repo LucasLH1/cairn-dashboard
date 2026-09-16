@@ -184,6 +184,8 @@ export function creerClient(jeton: string, depot: string, branche: string): Clie
           headers: entete(etag),
         })
 
+        noter(`contenu:${chemin}`, reponse.status, reponse.headers)
+
         const donnees = reponse.data
         // Un dossier revient sous forme de tableau : ce n'est pas un document.
         if (Array.isArray(donnees) || donnees.type !== 'file' || !('content' in donnees)) {
@@ -197,6 +199,12 @@ export function creerClient(jeton: string, depot: string, branche: string): Clie
         }
       }
       catch (erreur) {
+        // Un 304 est un appel sortant comme un autre : il doit être noté, c'est
+        // lui qu'on cherche à mesurer.
+        const entetes = (erreur as { response?: { headers?: unknown } })?.response?.headers
+        const statut = (erreur as { status?: number })?.status
+        if (statut !== undefined) noter(`contenu:${chemin}`, statut, entetes)
+
         if (estNonModifie(erreur)) return { modifie: false as const }
         throw erreur
       }
@@ -217,6 +225,8 @@ export function creerClient(jeton: string, depot: string, branche: string): Clie
             headers: entete(etag),
           })
 
+          noter('arbre', reponse.status, reponse.headers)
+
           return {
             modifie: true as const,
             valeur: reponse.data.tree.map(e => ({
@@ -228,6 +238,11 @@ export function creerClient(jeton: string, depot: string, branche: string): Clie
           }
         }
         catch (erreur) {
+          // Un 304 part bien sur le réseau : c'est justement lui qu'on mesure.
+          const entetes = (erreur as { response?: { headers?: unknown } })?.response?.headers
+          const statut = (erreur as { status?: number })?.status
+          if (statut !== undefined) noter('arbre', statut, entetes)
+
           if (estNonModifie(erreur)) return { modifie: false as const }
           throw erreur
         }
