@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { codeHttpPour, MESSAGES } from '../server/utils/echec-doc'
 import type { EchecDoc } from '../server/utils/doc-github'
 
-const CAUSES: EchecDoc[] = ['non-configure', 'refuse', 'quota', 'absent', 'injoignable']
+const CAUSES: EchecDoc[] = ['non-configure', 'refuse', 'quota', 'absent', 'injoignable', 'illisible']
 
 describe('le code HTTP distingue la demande fautive de l\'empêchement', () => {
   it('rend 404 pour un document qui n\'existe pas', () => {

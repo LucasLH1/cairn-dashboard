@@ -11,6 +11,7 @@ défaire à bon compte, et dont quelqu'un — dans six mois, ou six ans — voud
 | [0002](0002-hebergement-sur-coolify.md) | Hébergement sur Coolify | Où et par quoi le dashboard est mis en service. |
 | [0003](0003-dashboard-un-seul-environnement.md) | Dashboard : un seul environnement, production | Combien d'environnements, et ce qui déclenche la mise en production. |
 | [0004](0004-rendu-du-markdown.md) | Rendu du Markdown de cairn-wms | Avec quoi la documentation est rendue en HTML, et comment le HTML brut est neutralisé. |
+| [0005](0005-analyse-du-yaml.md) | Analyse du YAML de cairn-wms | Avec quoi le suivi de cairn-wms est lu, et pourquoi on ne suppose pas son format. |
 
 Ces décisions n'engagent que le dashboard. Elles ne tranchent rien pour cairn-wms, dont les choix se
 font dans son propre dépôt — et réciproquement.
