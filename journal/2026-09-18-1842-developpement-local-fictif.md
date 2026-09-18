@@ -69,6 +69,9 @@ données n'importent pas, et **aucun secret ne doit être à configurer**.
   du cache (30 s).
 - Rien n'est parti vers GitHub : le jeton et les identifiants OAuth sont inventés, et le vrai GitHub
   les aurait refusés.
+- **Essayé par Lucas depuis son navigateur, sous Windows** : « Tout tourne ». Le relais de WSL
+  atteint donc le dashboard et le faux GitHub, parcours de connexion compris. L'issue `#22` est
+  fermée.
 
 ### Les garde-fous
 
@@ -120,14 +123,12 @@ Choix faits en réalisant, à relire :
 
 ## Issues liées
 
-- `#22` — ouverte par cette session, porte ce travail.
+- `#22` — ouverte et fermée par cette session.
 
 ## Points ouverts
 
 - **La refonte du design est-elle une tranche ?** La règle 6 veut une tranche à la fois, et la suivante
   est la 7. Question posée à Lucas, sans réponse à ce stade.
-- **Pas encore essayé depuis le navigateur de Windows.** Tout a été éprouvé par HTTP depuis WSL. Si
-  `localhost:3000` ou `localhost:3999` n'y répondent pas, c'est le relais de WSL qu'il faut regarder.
 - **Node 24 sur le poste, 22.23.2 dans l'image** : un écart de `node:sqlite` ne se verrait pas en
   local. Aligner le poste (nvm) reste à faire.
 - **Le faux ne suit l'API que pour les champs lus aujourd'hui.** Les tranches 7 et 8 devront y ajouter
