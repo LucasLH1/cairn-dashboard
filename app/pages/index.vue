@@ -84,7 +84,6 @@ const groupes = computed<Groupe[]>(() => {
 })
 
 const aVenir = [
-  { tranche: '6', texte: 'Événements des sessions Claude Code dans le fil.' },
   { tranche: '7', texte: 'Connecteur MCP, pour Claude Chat et Cowork.' },
   { tranche: '8', texte: 'Déploiements de cairn-wms, déclenchés et suivis.' },
 ]

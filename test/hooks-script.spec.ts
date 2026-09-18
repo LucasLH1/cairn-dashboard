@@ -5,10 +5,11 @@
 // une vraie entrée sur son entrée standard et un vrai serveur en face. Ce qui
 // est vérifié ici, c'est ce qui sort, pas ce qu'on croit qu'il ferait.
 import { spawn } from 'node:child_process'
+import { mkdtempSync, rmSync } from 'node:fs'
 import { createServer } from 'node:http'
 import type { Server } from 'node:http'
 import { tmpdir } from 'node:os'
-import { resolve } from 'node:path'
+import { join, resolve } from 'node:path'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 const SCRIPT = resolve('scripts/hooks/cairn-hooks.mjs')
@@ -23,6 +24,12 @@ interface Recu {
 let serveur: Server
 let adresse: string
 let recus: Recu[] = []
+
+// Le script tient un compteur par session sur le poste. Les tests l'isolent dans
+// un dossier temporaire : sans cela, ils écrivaient dans le vrai
+// `~/.local/state/cairn-hooks` du développeur — et y laissaient des fixtures
+// qu'on a failli prendre pour des sessions réelles.
+let etat: string
 
 beforeAll(async () => {
   serveur = createServer((requete, reponse) => {
@@ -46,29 +53,42 @@ beforeAll(async () => {
   await new Promise<void>((tenu) => { serveur.listen(0, '127.0.0.1', tenu) })
   const a = serveur.address()
   adresse = `http://127.0.0.1:${typeof a === 'object' && a !== null ? a.port : 0}/hooks/claude-code`
+  etat = mkdtempSync(join(tmpdir(), 'cairn-hooks-etat-'))
 })
 
 afterAll(async () => {
   await new Promise<void>((tenu) => { serveur.close(() => tenu()) })
+  rmSync(etat, { recursive: true, force: true })
 })
 
 beforeEach(() => {
   recus = []
 })
 
-/** Lance le script avec cette entrée, et rend quand il a terminé. */
-function lancer(entree: Record<string, unknown>, options: { secret?: string | null } = {}): Promise<void> {
+/**
+ * Lance le script avec cette entrée, et rend quand il a terminé.
+ *
+ * Par défaut, le fichier du dépôt. Avec `installe`, un exécutable lancé
+ * **directement**, comme le fait la commande du hook — shebang et droit
+ * d'exécution compris.
+ */
+function lancer(entree: Record<string, unknown>, options: { secret?: string | null, installe?: string } = {}): Promise<void> {
   return new Promise((tenu, rompu) => {
     const environnement: Record<string, string> = {
       ...process.env as Record<string, string>,
       CAIRN_HOOKS_URL: adresse,
+      XDG_STATE_HOME: etat,
     }
 
     const secret = options.secret === undefined ? SECRET : options.secret
     if (secret === null) delete environnement.CAIRN_HOOKS_SECRET
     else environnement.CAIRN_HOOKS_SECRET = secret
 
-    const enfant = spawn(process.execPath, [SCRIPT], { env: environnement, stdio: ['pipe', 'ignore', 'ignore'] })
+    const [programme, argumentsLancement] = options.installe === undefined
+      ? [process.execPath, [SCRIPT]]
+      : [options.installe, []]
+
+    const enfant = spawn(programme, argumentsLancement, { env: environnement, stdio: ['pipe', 'ignore', 'ignore'] })
     enfant.on('error', rompu)
     enfant.on('close', () => tenu())
     enfant.stdin.end(JSON.stringify(entree))
@@ -148,7 +168,7 @@ describe('ce qui n\'en sort pas', () => {
   it('se tait sur une entrée illisible, sans échouer', async () => {
     await new Promise<void>((tenu) => {
       const enfant = spawn(process.execPath, [SCRIPT], {
-        env: { ...process.env as Record<string, string>, CAIRN_HOOKS_URL: adresse, CAIRN_HOOKS_SECRET: SECRET },
+        env: { ...process.env as Record<string, string>, CAIRN_HOOKS_URL: adresse, CAIRN_HOOKS_SECRET: SECRET, XDG_STATE_HOME: etat },
         stdio: ['pipe', 'ignore', 'ignore'],
       })
       enfant.on('close', (code) => {
@@ -190,5 +210,38 @@ describe('les motifs suivent l\'événement', () => {
   it('rapporte le type d\'un sous-agent quand il y en a un', async () => {
     await lancer({ session_id: 's', cwd: RACINE, hook_event_name: 'Stop', agent_type: 'Explore' })
     expect(recus[0]?.corps.agent).toBe('Explore')
+  })
+})
+
+describe('la copie installée fonctionne, sous son nom installé', () => {
+  it('émet depuis ~/.local/bin/cairn-hooks, lancé comme le lance le hook', async () => {
+    // Le test qui aurait attrapé le défaut : le script ne travaillait que sous
+    // le nom `cairn-hooks.mjs`, et l'installateur le copie sans extension. Tous
+    // les autres tests lançaient le fichier du dépôt — le bon nom, donc rien à
+    // voir. On éprouve ici l'artefact **tel qu'il est installé** : installateur
+    // exécuté dans une maison temporaire, puis copie lancée directement.
+    const maison = mkdtempSync(join(tmpdir(), 'cairn-hooks-maison-'))
+    try {
+      await new Promise<void>((tenu, rompu) => {
+        const enfant = spawn(process.execPath, [resolve('scripts/hooks/installer.mjs')], {
+          env: { ...process.env as Record<string, string>, HOME: maison },
+          stdio: 'ignore',
+        })
+        enfant.on('error', rompu)
+        enfant.on('close', code => (code === 0 ? tenu() : rompu(new Error(`installateur : sortie ${code}`))))
+      })
+
+      await lancer(
+        { session_id: 'session-installee', cwd: RACINE, hook_event_name: 'Stop' },
+        { installe: join(maison, '.local', 'bin', 'cairn-hooks') },
+      )
+
+      expect(recus).toHaveLength(1)
+      expect(recus[0]?.corps.evenement).toBe('Stop')
+      expect(recus[0]?.corps.session).toBe('session-installee')
+    }
+    finally {
+      rmSync(maison, { recursive: true, force: true })
+    }
   })
 })

@@ -66,6 +66,13 @@ Les valeurs de `env` atteignent tous les sous-processus que Claude Code démarre
 Cet emplacement est préféré à `~/.bashrc`, que les sessions à distance ne chargent pas
 nécessairement. **Une nouvelle session est nécessaire** pour que la variable soit prise.
 
+**Poste Windows + WSL : les hooks n'émettent que depuis une session lancée dans WSL.** Le script est
+installé dans le `~/.local/bin` de WSL, et le secret vit dans le `~/.claude/settings.json` de WSL.
+Une session Claude Code lancée côté Windows a un autre `$HOME` : elle ne trouve pas le script —
+`test -x "$HOME/.local/bin/cairn-hooks"` échoue, et le `|| true` la laisse continuer sans un mot —
+elle n'émet donc rien. C'est le garde-fou du script (« un script absent est un échec silencieux »),
+appliqué ici à la frontière des deux environnements.
+
 Côté serveur, la même valeur se nomme `NUXT_HOOKS_SECRET` (Coolify en production, `.env` en local).
 
 ## Activer les hooks dans un dépôt
