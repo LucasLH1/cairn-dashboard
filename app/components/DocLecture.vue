@@ -499,16 +499,16 @@ kbd {
   font-size: var(--fs-base);
 }
 
-/* — Le document rendu : les tailles et les couleurs de l'article du design — */
+/* — Le document rendu : les tailles et les couleurs de l'article du design —
+   Le design borne ses paragraphes à 68 caractères par ligne ; sur un écran
+   large, le texte s'arrêtait à mi-colonne. Lucas veut que le document occupe
+   toute la place de l'article : la borne n'est pas reprise (journal du
+   2026-09-18). */
 
 .prose {
   color: var(--c-text);
   font-size: var(--fs-lg);
   line-height: 1.7;
-}
-
-.prose :deep(> *) {
-  max-width: 68ch;
 }
 
 .prose :deep(h2),
@@ -615,7 +615,6 @@ kbd {
   display: block;
   overflow-x: auto;
   width: 100%;
-  max-width: none;
   margin: var(--sp-5) 0 0;
   border-collapse: collapse;
   font-size: var(--fs-base);
