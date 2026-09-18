@@ -1,6 +1,6 @@
 # 0011 — Autorisation OAuth du connecteur MCP
 
-**Statut** : proposée · **Date** : 2026-09-18 · **Remplace** : — · **Remplacée par** : —
+**Statut** : actée · **Date** : 2026-09-18 · **Remplace** : — · **Remplacée par** : —
 
 ## Contexte
 
@@ -173,7 +173,7 @@ l'option C ouvre une inscription ; l'option D ajoute un service pour authentifie
 dashboard authentifie déjà ; l'option E contredit le cadrage. Le serveur d'autorisation à écrire est
 petit, et il sera éprouvé comme les autres garde-fous : par des cas qui doivent échouer.
 
-*Proposée le 2026-09-18, à valider.*
+Décision validée en séance le 2026-09-18. Elle ne vaut que pour le dashboard.
 
 ### Ce qui l'encadre
 

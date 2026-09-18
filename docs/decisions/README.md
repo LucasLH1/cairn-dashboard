@@ -17,6 +17,7 @@ défaire à bon compte, et dont quelqu'un — dans six mois, ou six ans — voud
 | [0008](0008-reception-des-evenements-de-session.md) | Réception des événements des sessions Claude Code | Par quel mécanisme les sessions alimentent le fil, ce qu'elles en disent et ce qu'elles taisent. |
 | [0009](0009-identite-des-evenements-de-session.md) | Identité et rangement des événements de session | Ce qui distingue deux événements de session, et comment le fil les regroupe. |
 | [0010](0010-developpement-local-sur-donnees-fictives.md) | Développement local sur données fictives | Comment voir l'interface changer sur le poste, sans GitHub ni secret, et sans rien ouvrir en production. |
+| [0011](0011-autorisation-oauth-du-connecteur-mcp.md) | Autorisation OAuth du connecteur MCP | Qui délivre les jetons du connecteur, pour quel client, et ce que la base en conserve. |
 
 Ces décisions n'engagent que le dashboard. Elles ne tranchent rien pour cairn-wms, dont les choix se
 font dans son propre dépôt — et réciproquement.
