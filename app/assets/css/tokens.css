@@ -1,6 +1,6 @@
 /* Jetons du design — couleurs, espacements, rayons et tailles relevés dans
-   design/cairn-design-system.html. Imposés par la règle 7 de CLAUDE.md :
-   on les reprend tels quels, on n'en invente pas.
+   design/cairn-design-system.html, gabarit décodé, valeur par valeur. Imposés
+   par la règle 7 de CLAUDE.md : on les reprend tels quels, on n'en invente pas.
 
    Le design porte deux thèmes. Le sombre est celui par défaut ; le clair
    reprend les mêmes rôles. Le choix du visiteur prime sur celui du système. */
@@ -31,29 +31,68 @@
   --c-alert-soft: #f07268;
   --c-warn: #dda145;
 
-  /* Teintes portées du design : la marque encadrée, et le survol de sortie */
+  /* Le texte posé sur l'accent : le design l'écrit sombre, jamais blanc */
+  --c-sur-accent: #161316;
+
+  /* Teintes du design : chaque état a son fond et son filet, aux mêmes alphas.
+     L'accent teinte ce qui est courant (entrée active, jour, entrée en cours) ;
+     l'alerte ce qui réclame l'attention ; l'info ce qui est une action. */
+  --c-accent-fond: rgba(240, 86, 47, 0.1);
+  --c-accent-bord: rgba(240, 86, 47, 0.26);
+  --c-accent-survol: rgba(240, 86, 47, 0.4);
+  --c-accent-barre: rgba(240, 86, 47, 0.28);
+  --c-accent-barre-fond: linear-gradient(180deg, rgba(240, 86, 47, 0.18), rgba(240, 86, 47, 0.05));
+
+  --c-alert-fond: rgba(226, 85, 74, 0.1);
+  --c-alert-bord: rgba(226, 85, 74, 0.24);
+  --c-alert-teinte: rgba(226, 85, 74, 0.14);
+  --c-alert-colonne: rgba(226, 85, 74, 0.045);
+  --c-alert-bloc: rgba(226, 85, 74, 0.09);
+  --c-alert-filet: rgba(226, 85, 74, 0.28);
+
+  --c-info-fond: rgba(94, 130, 220, 0.14);
+  --c-info-bord: rgba(94, 130, 220, 0.3);
+  --c-info-survol: rgba(94, 130, 220, 0.22);
+  --c-info-bloc: rgba(94, 130, 220, 0.1);
+
+  --c-ok-fond: rgba(69, 185, 122, 0.14);
+
+  --c-warn-fond: rgba(221, 161, 69, 0.15);
+  --c-warn-encart: rgba(221, 161, 69, 0.08);
+  --c-warn-bord: rgba(221, 161, 69, 0.26);
+  --c-warn-signe: rgba(221, 161, 69, 0.2);
+
+  /* La marque encadrée : le bleu du design, en filet et en fond */
   --c-marque-bord: rgba(94, 130, 220, 0.4);
   --c-marque-fond: rgba(94, 130, 220, 0.12);
-  --c-alert-fond: rgba(226, 85, 74, 0.14);
 
-  /* Pastille active du sélecteur de thème : plus claire que la tuile qui la porte */
+  /* Pastille active des contrôles segmentés : plus claire que la tuile qui la porte */
   --c-bascule: #2b2f34;
   --sh-bascule: none;
 
-  /* Bouton d'accent du design : son dégradé et son halo */
+  /* Le disque d'accent du design : son dégradé et son halo */
   --g-accent: linear-gradient(150deg, #f4703f, #ef4f26);
   --sh-accent: 0 14px 34px rgba(240, 86, 47, 0.3);
+  --g-avatar: linear-gradient(145deg, #f0562f, #f4874f);
+
+  /* Les barres d'activité : une tuile qui s'estompe vers le bas */
+  --g-barre: linear-gradient(180deg, var(--c-tile), rgba(30, 33, 37, 0.35));
 
   /* Fond de page et ombre du cadre applicatif */
   --g-page: radial-gradient(900px 520px at 50% -10%, #1d1f22, #101113 60%, #0b0c0d);
   --sh-frame: 0 40px 90px rgba(0, 0, 0, 0.5);
 
-  /* Rayons */
+  /* Rayons — chaque brique a le sien dans le design */
   --r-frame: 18px;
   --r-card: 14px;
+  --r-bloc: 13px;
+  --r-aside: 12px;
+  --r-tuile: 11px;
   --r-tile: 10px;
   --r-rail: 9px;
+  --r-segment: 8px;
   --r-chip: 7px;
+  --r-touche: 6px;
   --r-pill: 99px;
 
   /* Espacements */
@@ -67,11 +106,16 @@
   /* Tailles de texte — l'échelle du design, du secondaire au nombre mis en avant */
   --fs-xs: 11px;
   --fs-sm: 11.5px;
+  --fs-sous: 12px;
   --fs-md: 12.5px;
   --fs-base: 13px;
+  --fs-ligne: 13.5px;
   --fs-lg: 14px;
+  --fs-tuile: 14.5px;
   --fs-card: 16px;
   --fs-xl: 17px;
+  --fs-section: 18px;
+  --fs-article: 21px;
   --fs-title: 22px;
   --fs-number: 31px;
 
@@ -82,6 +126,14 @@
   --sp-frame: 14px;
   --sp-contenu: 12px;
   --sp-grille: 10px;
+
+  /* Colonnes : le contenu principal, la colonne latérale, la navigation et la
+     table des matières de la documentation — les bases de flex du design */
+  --w-principal: 620px;
+  --w-lateral: 292px;
+  --w-lateral-bloc: 258px;
+  --w-nav-doc: 248px;
+  --w-toc-doc: 236px;
 
   --font-sans: 'DM Sans', system-ui, sans-serif;
   --font-mono: ui-monospace, monospace;
@@ -108,6 +160,8 @@
   --g-page: radial-gradient(900px 520px at 50% -10%, #ffffff, #f2f3f5 60%, #e7e8ec);
   --sh-frame: 0 40px 90px rgba(16, 18, 24, 0.12);
 
+  --g-barre: linear-gradient(180deg, var(--c-tile), rgba(200, 203, 208, 0.35));
+
   --c-bascule: #ffffff;
   --sh-bascule: 0 1px 3px rgba(0, 0, 0, 0.14);
 }
@@ -129,6 +183,8 @@
 
     --g-page: radial-gradient(900px 520px at 50% -10%, #ffffff, #f2f3f5 60%, #e7e8ec);
     --sh-frame: 0 40px 90px rgba(16, 18, 24, 0.12);
+
+    --g-barre: linear-gradient(180deg, var(--c-tile), rgba(200, 203, 208, 0.35));
 
     --c-bascule: #ffffff;
     --sh-bascule: 0 1px 3px rgba(0, 0, 0, 0.14);

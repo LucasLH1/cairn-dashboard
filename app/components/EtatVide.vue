@@ -22,7 +22,8 @@ defineProps<{
   align-items: center;
   gap: var(--sp-2);
   padding: var(--sp-6) var(--sp-5);
-  border-radius: var(--r-tile);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-tuile);
   background: var(--c-tile);
   text-align: center;
 }
