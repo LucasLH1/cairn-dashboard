@@ -23,7 +23,7 @@
 # À tenir à jour à chaque session, en même temps que journal/ et les issues.
 
 projet: Cairn Dashboard
-mis_a_jour_le: 2026-09-16
+mis_a_jour_le: 2026-09-18
 
 tranches:
 
@@ -71,7 +71,7 @@ tranches:
 
   - id: "6"
     nom: Événements des hooks Claude Code dans le fil en direct
-    etat: en développement
+    etat: livré
     issue: 6
     label: tranche/6-hooks-claude-code
 
