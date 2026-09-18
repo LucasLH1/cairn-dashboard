@@ -1,9 +1,11 @@
 // /health — 200 si les dépendances répondent et si l'application est utilisable,
 // 503 sinon (docs/deploiement.md §2).
 //
-// Quatre contrôles : le jeton GitHub (tranche 1a), la configuration de la
-// connexion (tranche 1b), une **lecture réelle de contenu** (tranche 3) et la
-// **base** (tranche 5).
+// Cinq contrôles : le jeton GitHub (tranche 1a), la configuration de la
+// connexion (tranche 1b), une **lecture réelle de contenu** (tranche 3), la
+// **base** (tranche 5) et la configuration du **connecteur MCP** (tranche 7) —
+// un connecteur qui ne peut rien délivrer rendrait le service inutilisable
+// pour Claude sans que rien ne le dise.
 //
 // La base est éprouvée en lecture **et en écriture** : un volume monté en
 // lecture seule laisse lire, et ne se révélerait qu'au premier webhook perdu —
@@ -40,11 +42,13 @@ export default defineEventHandler(async () => {
     Promise.resolve(etatConnexion(config)),
   ])
 
-  const sain = github === 'ok' && lecture === 'ok' && connexion === 'ok' && base === 'ok'
+  const connecteur = etatConnecteur(config)
+
+  const sain = github === 'ok' && lecture === 'ok' && connexion === 'ok' && base === 'ok' && connecteur === 'ok'
 
   const corps = {
     status: sain ? 'ok' : 'degraded',
-    checks: { github, lecture, connexion, base },
+    checks: { github, lecture, connexion, base, connecteur },
   }
 
   return new Response(JSON.stringify(corps), {

@@ -8,7 +8,7 @@
 // au démarrage, pas au premier webhook reçu.
 import { mkdirSync } from 'node:fs'
 import { dirname } from 'node:path'
-import { CHEMIN_PAR_DEFAUT, migrer, ouvrir, purger } from './base'
+import { CHEMIN_PAR_DEFAUT, migrer, ouvrir, purger, purgerRafraichissements } from './base'
 import type { Base } from './base'
 
 let instance: Base | null = null
@@ -44,9 +44,15 @@ export function obtenirBase(config: { baseFichier?: unknown }): Base {
   return db
 }
 
-/** Efface ce qui dépasse la conservation. Rend le nombre d'événements effacés. */
+/**
+ * Efface ce qui dépasse la conservation : les événements d'abord (fiche 0007),
+ * puis les jetons de rafraîchissement expirés (fiche 0011). Rend le nombre
+ * d'événements effacés.
+ */
 export function purgerBase(config: { baseFichier?: unknown }): number {
-  return purger(obtenirBase(config))
+  const db = obtenirBase(config)
+  purgerRafraichissements(db)
+  return purger(db)
 }
 
 /** Pour les tests : referme et oublie l'instance. */

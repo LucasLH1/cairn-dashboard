@@ -24,6 +24,7 @@ d'environnement.
 | `.github/workflows/` | `qualite.yml`, `image.yml`, `deploiement.yml`. |
 | `docs/cadrage.md` | Finalité, périmètre et principes du dashboard. |
 | `docs/deploiement.md` | Logique d'intégration et de déploiement. |
+| `docs/connecteur-mcp.md` | Le connecteur MCP : l'ajouter dans Claude, ce qu'il peut faire, ce qu'il expose. |
 | `docs/decisions/` | Les décisions engageantes, une fiche par décision. |
 | `design/` | Le design de référence, exporté de Claude Design. |
 | `journal/` | Une entrée par session de travail. |
@@ -79,6 +80,12 @@ ressources de l'interface répondent sans session.
 |---|---|
 | `/version` | `{"commit": "<sha>"}` — le SHA inscrit dans l'image à sa construction. |
 | `/health` | `200` si les dépendances répondent, `503` sinon. |
+
+## Connecteur MCP
+
+Claude Chat, Desktop, mobile et Cowork lisent et alimentent la documentation de cairn-wms par un
+connecteur MCP distant, à `/mcp`, protégé par OAuth — le dashboard est son propre serveur
+d'autorisation, pour un seul client pré-enregistré. Voir [`docs/connecteur-mcp.md`](docs/connecteur-mcp.md).
 
 ## Avancement
 

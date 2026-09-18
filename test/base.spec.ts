@@ -73,7 +73,8 @@ describe('les migrations', () => {
         VALUES ('deja-la', 'github', 'push', '2026-09-16T10:00:00.000Z', '{}');
     `)
 
-    expect(migrer(ancienne)).toBe(1)
+    // Toutes les migrations postérieures à la version 1 s'appliquent, quelles qu'elles soient.
+    expect(migrer(ancienne)).toBe(MIGRATIONS.length - 1)
     expect(compter(ancienne)).toBe(1)
     expect(derniers(ancienne, 1)[0]?.livraison).toBe('deja-la')
     expect(derniers(ancienne, 1)[0]?.session).toBeNull()

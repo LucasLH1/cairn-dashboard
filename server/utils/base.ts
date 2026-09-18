@@ -76,6 +76,27 @@ export const MIGRATIONS: Array<{ version: number, sql: string }> = [
       CREATE INDEX evenements_par_session ON evenements (session, recu_le DESC);
     `,
   },
+  {
+    // Fiche 0011 : les jetons de rafraîchissement du connecteur MCP, par leur
+    // seule empreinte. La rotation impose de les conserver : un jeton déjà
+    // remplacé qui se représente révoque toute sa famille. C'est la seconde
+    // donnée que la base porte, et la fiche 0011 la limite à cela.
+    version: 3,
+    sql: `
+      CREATE TABLE jetons_mcp (
+        id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        empreinte   TEXT    NOT NULL UNIQUE,
+        famille     TEXT    NOT NULL,
+        client      TEXT    NOT NULL,
+        sujet       TEXT    NOT NULL,
+        portees     TEXT    NOT NULL,
+        cree_le     TEXT    NOT NULL,
+        expire_le   TEXT    NOT NULL,
+        remplace_le TEXT
+      );
+      CREATE INDEX jetons_mcp_par_famille ON jetons_mcp (famille);
+    `,
+  },
 ]
 
 export function ouvrir(chemin: string): Base {
@@ -220,4 +241,79 @@ export function verifierBase(db: Base): EtatBase {
     }
     return 'lecture-seule'
   }
+}
+
+// — Les jetons de rafraîchissement du connecteur MCP — fiche 0011 ——————————
+
+export interface JetonRafraichissement {
+  empreinte: string
+  famille: string
+  client: string
+  sujet: string
+  portees: string[]
+  creeLe: string
+  expireLe: string
+}
+
+/** Conserve l'empreinte d'un jeton de rafraîchissement neuf. */
+export function conserverRafraichissement(db: Base, j: JetonRafraichissement): void {
+  db.prepare(`
+    INSERT INTO jetons_mcp (empreinte, famille, client, sujet, portees, cree_le, expire_le)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(j.empreinte, j.famille, j.client, j.sujet, j.portees.join(' '), j.creeLe, j.expireLe)
+}
+
+export type Rotation
+  = | { ok: true, jeton: JetonRafraichissement }
+    | { ok: false, raison: 'inconnu' | 'expire' | 'rejoue' }
+
+/**
+ * Consomme un jeton de rafraîchissement : le marque remplacé et rend ce qu'il
+ * portait, pour qu'un successeur soit émis dans la même famille.
+ *
+ * Un jeton **déjà remplacé** qui se représente est le signe d'un vol — l'un des
+ * deux porteurs n'est pas le client — et toute la famille est révoquée, comme
+ * l'OAuth 2.1 le demande pour les clients publics.
+ */
+export function tournerRafraichissement(db: Base, empreinte: string, maintenant: Date = new Date()): Rotation {
+  const ligne = db.prepare('SELECT * FROM jetons_mcp WHERE empreinte = ?').get(empreinte) as Record<string, unknown> | undefined
+  if (!ligne) return { ok: false, raison: 'inconnu' }
+
+  if (ligne.remplace_le !== null && ligne.remplace_le !== undefined) {
+    db.prepare('DELETE FROM jetons_mcp WHERE famille = ?').run(String(ligne.famille))
+    return { ok: false, raison: 'rejoue' }
+  }
+
+  if (String(ligne.expire_le) <= maintenant.toISOString()) {
+    db.prepare('DELETE FROM jetons_mcp WHERE empreinte = ?').run(empreinte)
+    return { ok: false, raison: 'expire' }
+  }
+
+  db.prepare('UPDATE jetons_mcp SET remplace_le = ? WHERE empreinte = ?').run(maintenant.toISOString(), empreinte)
+
+  return {
+    ok: true,
+    jeton: {
+      empreinte,
+      famille: String(ligne.famille),
+      client: String(ligne.client),
+      sujet: String(ligne.sujet),
+      portees: String(ligne.portees).split(' ').filter(Boolean),
+      creeLe: String(ligne.cree_le),
+      expireLe: String(ligne.expire_le),
+    },
+  }
+}
+
+/** Combien de jetons de rafraîchissement vivent, remplacés compris. */
+export function compterRafraichissements(db: Base): number {
+  const l = db.prepare('SELECT COUNT(*) AS n FROM jetons_mcp').get() as { n: number }
+  return Number(l.n)
+}
+
+/** Efface les jetons de rafraîchissement expirés. Rend le nombre effacé. */
+export function purgerRafraichissements(db: Base, maintenant: Date = new Date()): number {
+  const avant = compterRafraichissements(db)
+  db.prepare('DELETE FROM jetons_mcp WHERE expire_le <= ?').run(maintenant.toISOString())
+  return avant - compterRafraichissements(db)
 }

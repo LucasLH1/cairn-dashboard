@@ -7,6 +7,18 @@
 import { randomBytes, timingSafeEqual } from 'node:crypto'
 
 const NOM_COOKIE_ETAT = 'cairn_oauth_etat'
+const NOM_COOKIE_RETOUR = 'cairn_retour'
+
+/**
+ * Où revenir après la connexion. Seul un chemin du dashboard est accepté : un
+ * retour vers un autre site ferait de la connexion une redirection ouverte.
+ * Le connecteur MCP (fiche 0011) s'en sert pour ramener au consentement.
+ */
+function retourAcceptable(retour: unknown): string | null {
+  const r = String(retour ?? '')
+  if (!r.startsWith('/') || r.startsWith('//') || r.includes('\\') || r.includes('\0')) return null
+  return r
+}
 
 function rediriger(event: Parameters<typeof getRequestURL>[0], cible: string) {
   event.node.res.statusCode = 302
@@ -53,6 +65,16 @@ export default defineEventHandler(async (event) => {
       path: '/',
       maxAge: 600,
     })
+    const retour = retourAcceptable(url.searchParams.get('retour'))
+    if (retour) {
+      setCookie(event, NOM_COOKIE_RETOUR, retour, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: 600,
+      })
+    }
     rediriger(event, urlAutorisation(clientId, urlRappel, jeton))
     return
   }
@@ -84,5 +106,9 @@ export default defineEventHandler(async (event) => {
   }
 
   await ouvrirSession(event, utilisateur)
-  rediriger(event, '/')
+
+  // Là où la personne allait avant d'être arrêtée par la connexion, sinon l'accueil.
+  const retour = retourAcceptable(getCookie(event, NOM_COOKIE_RETOUR))
+  if (retour) deleteCookie(event, NOM_COOKIE_RETOUR, { path: '/' })
+  rediriger(event, retour ?? '/')
 })

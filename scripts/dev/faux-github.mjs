@@ -221,6 +221,30 @@ export async function demarrerFauxGithub({ idAutorise, login = 'compte-fictif', 
       return repondre(req, res, 200, { sha: empreinte('arbre'), truncated: false, tree: arbre })
     }
 
+    // L'écriture d'un fichier (fiche 0011), comme l'API de contenu de GitHub :
+    // le sha du contenu remplacé est exigé pour une mise à jour (422 sinon) et
+    // doit être celui du fichier actuel (409 sinon). Le fichier écrit reste en
+    // mémoire, servi par l'arbre et les contenus jusqu'à l'arrêt.
+    if (reste.startsWith('/contents/') && req.method === 'PUT') {
+      const demande = decodeURIComponent(reste.slice('/contents/'.length)).replace(/\/$/, '')
+      const corps = await lireCorps(req)
+      if (typeof corps.message !== 'string' || typeof corps.content !== 'string') {
+        return repondre(req, res, 422, { message: 'Validation Failed' })
+      }
+      const actuel = depot.get(demande)
+      if (actuel && !corps.sha) return repondre(req, res, 422, { message: 'Validation Failed: "sha" wasn\'t supplied' })
+      if (actuel && corps.sha !== empreinte(actuel)) return repondre(req, res, 409, { message: `${demande} does not match ${corps.sha}` })
+      if (!actuel && corps.sha) return repondre(req, res, 422, { message: 'Validation Failed' })
+      const contenu = Buffer.from(corps.content, 'base64')
+      depot.set(demande, contenu)
+      const commit = empreinte(`${demande}:${corps.message}:${Date.now()}`)
+      console.log(`[faux GitHub] écrit ${demande} sur ${corps.branch ?? '(défaut)'}, en mémoire : ${corps.message}`)
+      return repondre(req, res, actuel ? 200 : 201, {
+        content: { name: demande.split('/').pop(), path: demande, sha: empreinte(contenu), html_url: `https://github.com/${proprietaire}/${nom}/blob/${corps.branch ?? 'dev'}/${demande}` },
+        commit: { sha: commit, message: corps.message },
+      })
+    }
+
     if (reste.startsWith('/contents/')) {
       const demande = decodeURIComponent(reste.slice('/contents/'.length)).replace(/\/$/, '')
       const tous = fichiers()
