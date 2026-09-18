@@ -130,8 +130,10 @@
   /* Colonnes : le contenu principal, la colonne latérale, la navigation et la
      table des matières de la documentation — les bases de flex du design */
   --w-principal: 620px;
-  /* 292 px dans le design ; élargie à la demande de Lucas (journal du 2026-09-18). */
+  /* 292 px fixes dans le design. À la demande de Lucas (journal du 2026-09-18), la
+     colonne suit la fenêtre : 30 % de la zone de contenu, entre ces deux bornes. */
   --w-lateral: 324px;
+  --w-lateral-max: 600px;
   --w-lateral-bloc: 258px;
   --w-nav-doc: 248px;
   --w-toc-doc: 236px;

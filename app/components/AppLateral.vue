@@ -170,7 +170,7 @@ function quand(groupe: Groupe): string {
         />
       </section>
 
-      <section class="bloc">
+      <section class="bloc bloc--fil">
         <header class="tete">
           <h2 class="titre">Fil en direct</h2>
           <BaseEtiquette v-if="fil?.total">{{ fil.total }}</BaseEtiquette>
@@ -236,9 +236,14 @@ function quand(groupe: Groupe): string {
 </template>
 
 <style scoped>
+/* Le design lui donne une base fixe de 292 px. Lucas la trouvait trop étroite,
+   même élargie : elle suit désormais la fenêtre — 30 % de la zone de contenu,
+   jamais moins de 324 px ni plus de 600 px — et reste la même sur tous les
+   écrans (journal du 2026-09-18). Large, ses blocs se rangent côte à côte, le
+   fil prenant toute la largeur. */
 .lateral {
   display: grid;
-  flex: 1 1 var(--w-lateral);
+  flex: 0 0 clamp(var(--w-lateral), 30%, var(--w-lateral-max));
   grid-template-columns: repeat(auto-fit, minmax(var(--w-lateral-bloc), 1fr));
   align-content: start;
   gap: var(--sp-6);
@@ -253,6 +258,10 @@ function quand(groupe: Groupe): string {
   flex-direction: column;
   gap: 11px;
   min-width: 0;
+}
+
+.bloc--fil {
+  grid-column: 1 / -1;
 }
 
 .tete {

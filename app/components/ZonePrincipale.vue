@@ -12,7 +12,7 @@
 <style scoped>
 .zone {
   display: flex;
-  flex: 999 1 var(--w-principal);
+  flex: 1 1 var(--w-principal);
   flex-direction: column;
   gap: var(--sp-grille);
   min-width: 0;

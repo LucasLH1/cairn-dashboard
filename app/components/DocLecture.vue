@@ -245,7 +245,7 @@ const lienGithub = computed(() => {
 <style scoped>
 .doc {
   display: flex;
-  flex: 999 1 var(--w-principal);
+  flex: 1 1 var(--w-principal);
   flex-wrap: wrap;
   align-items: stretch;
   min-width: 0;

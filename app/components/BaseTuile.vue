@@ -115,6 +115,9 @@ const classes = computed(() => [
   font-size: var(--fs-tuile);
   font-weight: 500;
   line-height: 1.25;
+  /* Un mot plus long que la tuile — un sujet de journal, un nom de dépôt — se
+     coupe plutôt que de déborder : le design ne pose que des valeurs courtes. */
+  overflow-wrap: anywhere;
 }
 
 .tuile--compacte .valeur {

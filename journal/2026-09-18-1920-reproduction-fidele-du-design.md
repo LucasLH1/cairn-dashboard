@@ -81,7 +81,15 @@ Son `npm run dev:fictif` sert cet arbre de travail à chaud : il a regardé http
 et jugé le résultat bon (« c'est niquel »), avec deux demandes, faites aussitôt :
 
 - **la colonne latérale, « un peu plus large »** : sa base de flex passe de 292 px, la valeur du
-  design, à 324 px ;
+  design, à 324 px. Lucas la trouve encore trop petite, et dit qu'elle « ne fait pas la même taille
+  sur toutes les pages ». **Mesuré** par un script Playwright sur les six écrans, de 1024 à
+  2560 px de fenêtre : la largeur est identique partout (324 px dès 1100 px de fenêtre ; en
+  dessous, la colonne passe sous le contenu, sur toute la largeur) ; seule sa hauteur suit celle
+  de la page, comme dans le design. La colonne devient **proportionnelle** : 30 % de la zone de
+  contenu, jamais moins de 324 px ni plus de 600 px — 404 px à 1440, 548 px à 1920, 600 px à
+  2560 —, mesurée identique sur les six écrans. Large, « Activité » et « Sources » se rangent côte
+  à côte et le fil prend toute la largeur. Un mot plus long qu'une tuile se coupe désormais au lieu
+  de déborder ;
 - **le thème clair, « trop clair »** — précisément le point que j'avais signalé : le design garde
   son pourtour sombre dans les deux thèmes, et la tranche 1c l'avait remplacé par un fond clair.
   Le fond de page et l'ombre du cadre redeviennent ceux du design, dans les deux thèmes. L'écart de
@@ -122,8 +130,9 @@ Aucune fiche : aucune dépendance, aucun choix engageant. Tout ce qui suit relè
   (celle des tuiles d'alerte) : elles portent des titres longs, pas « 12 j ».
 - **La carte « Ce qui vient ensuite » disparaît** : le design n'a pas de bloc pour elle, et
   `status.yml` porte déjà l'information.
-- **La colonne latérale fait 324 px, non 292** : demandé par Lucas, à l'usage. Seule mesure du
-  design qui n'est pas reprise telle quelle.
+- **La colonne latérale est proportionnelle — 30 % de la zone de contenu, entre 324 et 600 px —
+  là où le design lui donne 292 px fixes** : demandé par Lucas, à l'usage, en deux temps. Seule
+  mesure du design qui n'est pas reprise telle quelle.
 - **Le sombre est le thème par défaut, sans consulter le système** : demandé par Lucas ; c'est le
   comportement du design.
 - **Deux ajouts d'interface, avec les briques du design** : le champ « Rechercher » filtre la
@@ -164,6 +173,9 @@ Aucune fiche : aucune dépendance, aucun choix engageant. Tout ce qui suit relè
   vers `main` — décision humaine — et la mise en production.
 - **L'écran de connexion en thème clair** — carte sur fond sombre à côté du panneau clair — n'a pas
   encore été vu par Lucas.
+- **« Pas la même taille sur toutes les pages »** : la mesure ne montre aucune différence de
+  largeur ; si Lucas parlait de la hauteur, qui suit la page, la colonne peut être collée à
+  l'écran (toujours visible, à hauteur de fenêtre). Question posée.
 - **Les captures jointes sont prises sur les données fictives**, pas sur l'écran réel connecté que
   la règle 7 exige pour livrer. Elles montrent la forme ; la preuve de livraison se refera sur la
   production.
