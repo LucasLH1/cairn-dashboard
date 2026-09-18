@@ -25,6 +25,13 @@ MDP_SESSION="$(head -c 48 /dev/urandom | base64 | tr -d '\n')"
 ID_AUTORISE=68059501
 SECRET_HOOKS="$(head -c 32 /dev/urandom | base64 | tr -d '\n')"
 
+# Adresses de GitHub substituables en développement seulement (fiche 0010). Le
+# conteneur nominal les reçoit, pointées vers une adresse où rien n'écoute :
+# l'image doit les ignorer. Si elle les suivait, /health tomberait à 503 et la
+# connexion ne mènerait plus chez GitHub — les deux vérifications ci-dessous le
+# verraient.
+LEURRE="http://127.0.0.1:9"
+
 # Identifiants OAuth factices : ils ne servent qu'à rendre la configuration
 # complète. Aucun appel n'est fait chez GitHub pendant l'épreuve.
 demarrer() { # $1 = jeton de lecture, $2 = secret de session (défaut : le bon)
@@ -37,6 +44,8 @@ demarrer() { # $1 = jeton de lecture, $2 = secret de session (défaut : le bon)
     -e "NUXT_OAUTH_GITHUB_CLIENT_ID=epreuve" \
     -e "NUXT_OAUTH_GITHUB_CLIENT_SECRET=epreuve" \
     -e "NUXT_HOOKS_SECRET=${SECRET_HOOKS}" \
+    -e "NUXT_GITHUB_API_URL=${LEURRE}" \
+    -e "NUXT_GITHUB_WEB_URL=${LEURRE}" \
     "$IMAGE" >/dev/null
 }
 
@@ -106,6 +115,7 @@ case "$CIBLE" in
   https://github.com/login/oauth/authorize*) echo "   connexion configurée : part chez GitHub" ;;
   *) echo "la connexion devrait mener chez GitHub, elle mène à '${CIBLE}'"; exit 1 ;;
 esac
+echo "   adresses de développement reçues et ignorées : /health a lu le vrai GitHub, la connexion y mène"
 
 echo "== un sceau valide ne suffit pas : l'identifiant est revérifié"
 SESSION_AUTRE="$(forger_session 999999)"

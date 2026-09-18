@@ -11,6 +11,15 @@ const { data: moi } = await useFetch<{ login: string | null }>('/api/moi', {
 })
 
 const initiales = computed(() => (moi.value?.login ?? '??').slice(0, 2).toUpperCase())
+
+// Le point de présence du design, sur l'avatar : ici, il dit si le fil en
+// direct est ouvert — c'est le seul « en ligne » qui ait un sens.
+const etat = useEtatFil()
+const presence = computed(() => {
+  if (etat.value === 'ouvert') return { classe: 'presence--ouvert', texte: 'fil en direct ouvert' }
+  if (etat.value === 'connexion') return { classe: 'presence--connexion', texte: 'connexion au fil en direct' }
+  return { classe: 'presence--ferme', texte: 'fil en direct fermé' }
+})
 </script>
 
 <template>
@@ -19,7 +28,10 @@ const initiales = computed(() => (moi.value?.login ?? '??').slice(0, 2).toUpperC
 
     <div class="actions">
       <ThemeToggle />
-      <span class="compte" :title="moi?.login ?? 'Compte connecté'">{{ initiales }}</span>
+      <span class="avatar" :title="`${moi?.login ?? 'Compte connecté'} — ${presence.texte}`">
+        <span class="compte">{{ initiales }}</span>
+        <span class="presence" :class="presence.classe" aria-hidden="true" />
+      </span>
     </div>
   </header>
 </template>
@@ -32,7 +44,7 @@ const initiales = computed(() => (moi.value?.login ?? '??').slice(0, 2).toUpperC
   justify-content: space-between;
   gap: var(--sp-5);
   min-height: var(--h-header);
-  padding: var(--sp-4) var(--sp-6);
+  padding: 0 var(--sp-6);
   border-bottom: 1px solid var(--c-border);
 }
 
@@ -45,20 +57,49 @@ h1 {
   display: flex;
   flex: none;
   align-items: center;
-  gap: var(--sp-5);
+  gap: 12px;
+}
+
+.avatar {
+  position: relative;
+  flex: none;
+  width: 34px;
+  height: 34px;
 }
 
 .compte {
   display: grid;
-  flex: none;
   place-items: center;
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: linear-gradient(145deg, var(--c-accent), var(--c-accent-soft));
-  color: #161316;
+  background: var(--g-avatar);
+  color: var(--c-sur-accent);
   font-size: var(--fs-base);
   font-weight: 600;
+}
+
+.presence {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 11px;
+  height: 11px;
+  border: 2px solid var(--c-window);
+  border-radius: 50%;
+  background: var(--c-dim);
+}
+
+.presence--ouvert {
+  background: var(--c-ok);
+}
+
+.presence--connexion {
+  background: var(--c-warn);
+}
+
+.presence--ferme {
+  background: var(--c-alert);
 }
 
 @media (max-width: 640px) {

@@ -71,3 +71,42 @@ button {
   outline: 2px solid var(--c-info);
   outline-offset: 2px;
 }
+
+/* Les champs de saisie, sur la tuile du design : coins de 11 px, filet, et le
+   filet d'accent quand le champ a la main. Les filtres reprennent le bouton
+   discret du design. */
+input[type='text'],
+input[type='search'],
+textarea,
+select {
+  padding: 8px 11px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-tuile);
+  background: var(--c-tile);
+  color: var(--c-text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-md);
+}
+
+textarea {
+  resize: vertical;
+}
+
+input[type='text']:focus-visible,
+input[type='search']:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  border-color: var(--c-accent-survol);
+  outline: none;
+}
+
+select.filtre {
+  padding: 7px 13px;
+  border-radius: var(--r-tile);
+  background: var(--c-card);
+  font-weight: 500;
+}
+
+select.filtre:hover {
+  background: var(--c-tile);
+}

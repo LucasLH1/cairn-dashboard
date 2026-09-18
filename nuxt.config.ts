@@ -38,6 +38,17 @@ export default defineNuxtConfig({
     },
   },
 
+  // Développement local sur données fictives — fiche 0010. Ces clés n'existent
+  // qu'en développement : l'image de production ne les connaît pas, et une
+  // variable NUXT_* ne peut pas les y faire naître. `npm run dev:fictif` les fait
+  // pointer vers le faux GitHub du poste.
+  $development: {
+    runtimeConfig: {
+      githubApiUrl: '',
+      githubWebUrl: '',
+    },
+  },
+
   nitro: {
     preset: 'node-server',
     // Le fil en direct (tranche 5). La fiche 0001 a retenu Nuxt parce que Nitro

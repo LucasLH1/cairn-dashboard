@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// L'avancement de cairn-wms — tranche 3.
+// L'avancement de cairn-wms — tranche 3, sur les briques du design.
 //
 // Les couches et les modules paraissent dans l'ordre du fichier, jamais
 // réordonnés : c'est cairn-wms qui décide de sa progression. Les états sont les
@@ -18,7 +18,7 @@ const { data } = await useFetch<Avancement & {
   compte?: { total: number, parEtat: Record<string, number>, inconnus: number }
   echec?: EchecDoc
   raison?: string
-}>('/api/avancement', { default: () => ({ projet: null, misAJourLe: null, couches: [] }) })
+}>('/api/avancement', { key: 'avancement', default: () => ({ projet: null, misAJourLe: null, couches: [] }) })
 
 const echec = computed(() => data.value?.echec ?? null)
 const couches = computed(() => data.value?.couches ?? [])
@@ -36,15 +36,15 @@ function lienIssue(numero: number | null): string | null {
   if (numero === null || !data.value?.depot) return null
   return `https://github.com/${data.value.depot}/issues/${numero}`
 }
+
+const lienSuivi = computed(() => (data.value?.depot
+  ? `https://github.com/${data.value.depot}/blob/${data.value.branche ?? 'dev'}/status.yml`
+  : null))
 </script>
 
 <template>
-  <div class="colonne">
-    <BaseCard
-      v-if="echec"
-      titre="Avancement de Cairn WMS"
-      sous-titre="Lu dans son suivi"
-    >
+  <ZonePrincipale>
+    <BaseCard v-if="echec" titre="Avancement de Cairn WMS" sous-titre="lu dans son suivi">
       <EtatEchec :titre="MESSAGES[echec].titre" :detail="MESSAGES[echec].detail" />
       <p v-if="data?.raison" class="raison">{{ data.raison }}</p>
     </BaseCard>
@@ -52,57 +52,60 @@ function lienIssue(numero: number | null): string | null {
     <template v-else>
       <BaseCard
         :titre="data?.projet ?? 'Avancement'"
-        :sous-titre="`${compte?.total ?? 0} modules · suivi mis à jour le ${data?.misAJourLe ?? '—'}`"
-        mention="Source de vérité"
+        :compte="compte?.total"
+        :sous-titre="`suivi mis à jour le ${data?.misAJourLe ?? '—'}`"
       >
-        <ul v-if="compte" class="resume">
-          <li v-for="etat in ORDRE" :key="etat" class="part">
-            <span class="nombre">{{ compte.parEtat[etat] ?? 0 }}</span>
-            <span class="libelle">{{ etat }}</span>
-          </li>
-          <li v-if="compte.inconnus > 0" class="part part--alerte">
-            <span class="nombre">{{ compte.inconnus }}</span>
-            <span class="libelle">état inconnu</span>
-          </li>
-        </ul>
+        <template #lien>
+          <LienChevron v-if="lienSuivi" :href="lienSuivi">GitHub</LienChevron>
+        </template>
+
+        <div v-if="compte" class="etats">
+          <BaseTuile
+            v-for="etat in ORDRE"
+            :key="etat"
+            compacte
+            :libelle="etat"
+            :valeur="String(compte.parEtat[etat] ?? 0)"
+          />
+          <BaseTuile
+            v-if="compte.inconnus > 0"
+            compacte
+            teinte="alerte"
+            libelle="état inconnu"
+            :valeur="String(compte.inconnus)"
+          />
+        </div>
       </BaseCard>
 
       <BaseCard
         v-for="couche in couches"
         :key="couche.id"
         :titre="couche.jalon ?? couche.nom"
-        :mention="`${couche.modules.length}`"
+        :compte="couche.modules.length"
       >
-        <ul class="modules">
-          <li v-for="module in couche.modules" :key="module.id" class="module">
-            <span class="pastille" :class="classeEtat(module)" aria-hidden="true" />
-
-            <span class="identite">
-              <span class="nom">
-                <span class="numero">{{ module.id }}</span>
-                {{ module.nom }}
-              </span>
-              <span class="etat" :class="{ 'etat--signale': module.etat === null }">
-                {{ module.etat ?? `état inconnu : « ${module.etatBrut || 'absent' } »` }}
-              </span>
-            </span>
-
+        <LigneListe
+          v-for="module in couche.modules"
+          :key="module.id"
+          :titre="`${module.id} — ${module.nom}`"
+          :sous="module.etat ?? `état inconnu : « ${module.etatBrut || 'absent'} »`"
+          :courant="module.etat === 'en développement'"
+        >
+          <template #icone>
+            <span class="pastille" :class="classeEtat(module)" />
+          </template>
+          <template #droite>
             <span class="liens">
               <NuxtLink
                 v-if="module.doc"
                 class="lien"
                 :to="`/documentation/${module.doc}`"
                 :title="`Documentation du module ${module.id}`"
-              >
-                doc
-              </NuxtLink>
+              >doc</NuxtLink>
               <NuxtLink
                 class="lien"
-                :to="`/tickets?module=module/${module.id}`"
+                :to="`/tickets?module=${module.id}`"
                 :title="`Tickets du module ${module.id}`"
-              >
-                tickets
-              </NuxtLink>
+              >tickets</NuxtLink>
               <a
                 v-if="lienIssue(module.issue)"
                 class="lien"
@@ -110,92 +113,31 @@ function lienIssue(numero: number | null): string | null {
                 target="_blank"
                 rel="nofollow noopener noreferrer"
                 :title="`Issue GitHub du module ${module.id}`"
-              >
-                #{{ module.issue }}
-              </a>
+              >#{{ module.issue }}</a>
             </span>
-          </li>
-        </ul>
+          </template>
+        </LigneListe>
       </BaseCard>
     </template>
-  </div>
+  </ZonePrincipale>
 </template>
 
 <style scoped>
-.colonne {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-grille);
-}
-
 .raison {
-  margin-top: var(--sp-3);
   color: var(--c-dim);
   font-size: var(--fs-sm);
 }
 
-.resume {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.etats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: var(--sp-4);
 }
 
-.part {
-  display: flex;
-  flex: 1 1 110px;
-  flex-direction: column;
-  gap: 2px;
-  padding: 8px var(--sp-4);
-  border-radius: var(--r-tile);
-  background: var(--c-tile);
-}
-
-.part--alerte {
-  color: var(--c-warn);
-}
-
-.nombre {
-  color: var(--c-text);
-  font-size: var(--fs-number);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-}
-
-.part--alerte .nombre {
-  color: var(--c-warn);
-}
-
-.libelle {
-  color: var(--c-muted);
-  font-size: var(--fs-sm);
-}
-
-.modules {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.module {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-  padding: 8px var(--sp-4);
-  border-radius: var(--r-tile);
-  background: var(--c-tile);
-}
-
+/* Dans le disque, le point d'état du module, aux couleurs des états. */
 .pastille {
-  flex: none;
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--c-dim);
 }
@@ -205,7 +147,7 @@ function lienIssue(numero: number | null): string | null {
 }
 
 .etat--2 {
-  background: var(--c-accent);
+  background: var(--c-sur-accent);
 }
 
 .etat--3 {
@@ -216,57 +158,27 @@ function lienIssue(numero: number | null): string | null {
   background: var(--c-warn);
 }
 
-.identite {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.nom {
-  display: flex;
-  gap: var(--sp-2);
-  min-width: 0;
-  color: var(--c-text);
-  font-size: var(--fs-md);
-}
-
-.numero {
-  flex: none;
-  color: var(--c-dim);
-  font-family: var(--font-mono);
-  font-size: var(--fs-xs);
-}
-
-.etat {
-  color: var(--c-muted);
-  font-size: var(--fs-sm);
-}
-
-.etat--signale {
-  color: var(--c-warn);
-}
-
 .liens {
   display: flex;
-  flex: none;
   gap: var(--sp-2);
 }
 
+/* La touche du design (« ⌘K ») porte les petits liens d'une ligne. */
 .lien {
-  padding: 2px var(--sp-3);
-  border-radius: var(--r-chip);
-  background: var(--c-card);
+  padding: 2px 6px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-touche);
   color: var(--c-muted);
   font-size: var(--fs-xs);
 }
 
 .lien:hover {
+  border-color: var(--c-accent-survol);
   color: var(--c-text);
 }
 
 @media (max-width: 640px) {
-  .module {
+  .liens {
     flex-wrap: wrap;
   }
 }

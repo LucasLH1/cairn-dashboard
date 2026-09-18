@@ -26,7 +26,8 @@ onMounted(() => {
     return
   }
 
-  theme.value = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
+  // Sans choix enregistré, c'est le sombre : le thème par défaut, comme dans le design.
+  theme.value = 'dark'
 })
 </script>
 

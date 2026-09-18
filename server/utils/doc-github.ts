@@ -8,7 +8,9 @@
 // L'accès passe par Octokit (fiche 0001). Le client est injectable pour que les
 // tests éprouvent les cas d'échec sans toucher au réseau.
 import { Octokit } from '@octokit/rest'
+import { adresseApi } from './adresses-github'
 import { creerCache, estNonModifie, servir } from './cache-github'
+import { noter } from './journal-github'
 
 /**
  * Ce qui peut empêcher la lecture elle-même : la configuration, GitHub, le
@@ -163,12 +165,15 @@ function entete(etag: string | null): Record<string, string> {
   return etag ? { 'if-none-match': etag } : {}
 }
 
-/** Construit le client de lecture. `depot` a la forme `proprietaire/depot`. */
-export function creerClient(jeton: string, depot: string, branche: string): ClientDoc {
+/**
+ * Construit le client de lecture. `depot` a la forme `proprietaire/depot`.
+ * `api` n'est à fournir qu'en test : ailleurs, c'est celle de `adresses-github.ts`.
+ */
+export function creerClient(jeton: string, depot: string, branche: string, api = adresseApi()): ClientDoc {
   const [proprietaire, nom] = depot.split('/')
   const owner = proprietaire ?? ''
   const repo = nom ?? ''
-  const octokit = new Octokit({ auth: jeton, userAgent: 'cairn-dashboard' })
+  const octokit = new Octokit({ auth: jeton, userAgent: 'cairn-dashboard', baseUrl: api })
 
   async function lireBrut(chemin: string): Promise<string> {
     const cle = `${depot}@${branche}:${chemin}`

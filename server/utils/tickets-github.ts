@@ -8,6 +8,7 @@
 // Le client est injectable : les tests éprouvent la création sans écrire dans
 // cairn-wms, et sans dépôt d'essai à nettoyer.
 import { Octokit } from '@octokit/rest'
+import { adresseApi } from './adresses-github'
 import { creerCache, estNonModifie, servir } from './cache-github'
 import { noter } from './journal-github'
 import { depuisIssue, estUneIssue } from './tickets'
@@ -76,6 +77,7 @@ export function creerClientTickets(
   jeton: string,
   depot: string,
   injecte?: OctokitTickets,
+  api = adresseApi(),
 ): ClientTickets {
   const [proprietaire, nom] = depot.split('/')
   const owner = proprietaire ?? ''
@@ -83,7 +85,7 @@ export function creerClientTickets(
   // Les types d'Octokit sont plus riches que ceux dont ce module a besoin :
   // la conversion dit qu'on n'en emploie qu'une part.
   const octokit = injecte
-    ?? (new Octokit({ auth: jeton, userAgent: 'cairn-dashboard' }) as unknown as OctokitTickets)
+    ?? (new Octokit({ auth: jeton, userAgent: 'cairn-dashboard', baseUrl: api }) as unknown as OctokitTickets)
 
   return {
     async labels() {

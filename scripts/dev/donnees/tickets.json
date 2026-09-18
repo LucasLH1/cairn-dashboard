@@ -1,0 +1,449 @@
+{
+  "labels": [
+    {
+      "name": "bug",
+      "color": "d73a4a",
+      "description": "Something isn't working"
+    },
+    {
+      "name": "spec",
+      "color": "fbca04",
+      "description": "Rédaction ou correction de la spécification métier"
+    },
+    {
+      "name": "tech",
+      "color": "0052cc",
+      "description": "Travail de réalisation ou d'outillage"
+    },
+    {
+      "name": "couche/0-socle",
+      "color": "0b3d91",
+      "description": "Couche 0 — Socle transverse"
+    },
+    {
+      "name": "module/0.1-sites-et-organisation",
+      "color": "ededed",
+      "description": "Module 0.1 — Sites et organisation"
+    },
+    {
+      "name": "module/0.2-catalogue-articles",
+      "color": "ededed",
+      "description": "Module 0.2 — Catalogue articles"
+    },
+    {
+      "name": "module/0.3-adressage",
+      "color": "ededed",
+      "description": "Module 0.3 — Adressage des emplacements"
+    },
+    {
+      "name": "module/0.4-unites-logistiques",
+      "color": "ededed",
+      "description": "Module 0.4 — Unités logistiques"
+    },
+    {
+      "name": "couche/1-flux-entrants",
+      "color": "1d4ed8",
+      "description": "Couche 1 — Flux entrants"
+    },
+    {
+      "name": "module/1.1-avis-de-reception",
+      "color": "ededed",
+      "description": "Module 1.1 — Avis de réception"
+    },
+    {
+      "name": "module/1.2-controle-qualite",
+      "color": "ededed",
+      "description": "Module 1.2 — Contrôle qualité à réception"
+    },
+    {
+      "name": "module/1.3-rangement-guide",
+      "color": "ededed",
+      "description": "Module 1.3 — Rangement guidé"
+    },
+    {
+      "name": "couche/2-coeur-stock",
+      "color": "6d28d9",
+      "description": "Couche 2 — Cœur stock"
+    },
+    {
+      "name": "module/2.1-reapprovisionnement",
+      "color": "ededed",
+      "description": "Module 2.1 — Réapprovisionnement interne"
+    },
+    {
+      "name": "module/2.2-inventaire-tournant",
+      "color": "ededed",
+      "description": "Module 2.2 — Inventaire tournant"
+    },
+    {
+      "name": "module/2.3-lots-et-peremption",
+      "color": "ededed",
+      "description": "Module 2.3 — Lots et dates de péremption"
+    },
+    {
+      "name": "couche/3-flux-sortants",
+      "color": "be185d",
+      "description": "Couche 3 — Flux sortants"
+    },
+    {
+      "name": "module/3.1-vagues-de-preparation",
+      "color": "ededed",
+      "description": "Module 3.1 — Vagues de préparation"
+    },
+    {
+      "name": "module/3.2-colisage",
+      "color": "ededed",
+      "description": "Module 3.2 — Colisage et étiquetage"
+    },
+    {
+      "name": "couche/4-pilotage",
+      "color": "047857",
+      "description": "Couche 4 — Pilotage"
+    },
+    {
+      "name": "module/4.1-indicateurs",
+      "color": "ededed",
+      "description": "Module 4.1 — Indicateurs d'activité"
+    }
+  ],
+  "jalons": [
+    {
+      "numero": 1,
+      "titre": "Couche 0 — Socle transverse"
+    },
+    {
+      "numero": 2,
+      "titre": "Couche 1 — Flux entrants"
+    },
+    {
+      "numero": 3,
+      "titre": "Couche 2 — Cœur stock"
+    },
+    {
+      "numero": 4,
+      "titre": "Couche 3 — Flux sortants"
+    },
+    {
+      "numero": 5,
+      "titre": "Couche 4 — Pilotage"
+    }
+  ],
+  "tickets": [
+    {
+      "numero": 1,
+      "titre": "Réaliser 0.1 — Sites et organisation",
+      "etat": "closed",
+      "labels": [
+        "tech",
+        "couche/0-socle",
+        "module/0.1-sites-et-organisation"
+      ],
+      "commentaires": 1,
+      "cree_le": "2026-09-02T01:11:00Z",
+      "jalon": "Couche 0 — Socle transverse"
+    },
+    {
+      "numero": 2,
+      "titre": "Réaliser 0.2 — Catalogue articles",
+      "etat": "closed",
+      "labels": [
+        "tech",
+        "couche/0-socle",
+        "module/0.2-catalogue-articles"
+      ],
+      "commentaires": 2,
+      "cree_le": "2026-09-02T02:12:00Z",
+      "jalon": "Couche 0 — Socle transverse"
+    },
+    {
+      "numero": 3,
+      "titre": "Réaliser 0.3 — Adressage des emplacements",
+      "etat": "open",
+      "labels": [
+        "tech",
+        "couche/0-socle",
+        "module/0.3-adressage"
+      ],
+      "commentaires": 0,
+      "cree_le": "2026-09-02T03:13:00Z",
+      "jalon": "Couche 0 — Socle transverse"
+    },
+    {
+      "numero": 4,
+      "titre": "Réaliser 0.4 — Unités logistiques",
+      "etat": "open",
+      "labels": [
+        "tech",
+        "couche/0-socle",
+        "module/0.4-unites-logistiques"
+      ],
+      "commentaires": 1,
+      "cree_le": "2026-09-02T04:14:00Z",
+      "jalon": "Couche 0 — Socle transverse"
+    },
+    {
+      "numero": 5,
+      "titre": "Réaliser 1.1 — Avis de réception",
+      "etat": "open",
+      "labels": [
+        "tech",
+        "couche/1-flux-entrants",
+        "module/1.1-avis-de-reception"
+      ],
+      "commentaires": 2,
+      "cree_le": "2026-09-02T05:15:00Z",
+      "jalon": "Couche 1 — Flux entrants"
+    },
+    {
+      "numero": 6,
+      "titre": "Réaliser 1.2 — Contrôle qualité à réception",
+      "etat": "open",
+      "labels": [
+        "tech",
+        "couche/1-flux-entrants",
+        "module/1.2-controle-qualite"
+      ],
+      "commentaires": 0,
+      "cree_le": "2026-09-02T06:10:00Z",
+      "jalon": "Couche 1 — Flux entrants"
+    },
+    {
+      "numero": 7,
+      "titre": "Réaliser 1.3 — Rangement guidé",
+      "etat": "open",
+      "labels": [
+        "tech",
+        "couche/1-flux-entrants",
+        "module/1.3-rangement-guide"
+      ],
+      "commentaires": 1,
+      "cree_le": "2026-09-02T07:11:00Z",
+      "jalon": "Couche 1 — Flux entrants"
+    },
+    {
+      "numero": 8,
+      "titre": "Réaliser 2.1 — Réapprovisionnement interne",
+      "etat": "open",
+      "labels": [
+        "tech",
+        "couche/2-coeur-stock",
+        "module/2.1-reapprovisionnement"
+      ],
+      "commentaires": 2,
+      "cree_le": "2026-09-02T08:12:00Z",
+      "jalon": "Couche 2 — Cœur stock"
+    },
+    {
+      "numero": 9,
+      "titre": "Spécifier 2.2 — Inventaire tournant",
+      "etat": "open",
+      "labels": [
+        "spec",
+        "couche/2-coeur-stock",
+        "module/2.2-inventaire-tournant"
+      ],
+      "commentaires": 0,
+      "cree_le": "2026-09-02T10:09:00Z",
+      "jalon": "Couche 2 — Cœur stock"
+    },
+    {
+      "numero": 10,
+      "titre": "Spécifier 2.3 — Lots et dates de péremption",
+      "etat": "open",
+      "labels": [
+        "spec",
+        "couche/2-coeur-stock",
+        "module/2.3-lots-et-peremption"
+      ],
+      "commentaires": 0,
+      "cree_le": "2026-09-02T10:10:00Z",
+      "jalon": "Couche 2 — Cœur stock"
+    },
+    {
+      "numero": 11,
+      "titre": "Spécifier 3.1 — Vagues de préparation",
+      "etat": "open",
+      "labels": [
+        "spec",
+        "couche/3-flux-sortants",
+        "module/3.1-vagues-de-preparation"
+      ],
+      "commentaires": 0,
+      "cree_le": "2026-09-02T10:11:00Z",
+      "jalon": "Couche 3 — Flux sortants"
+    },
+    {
+      "numero": 12,
+      "titre": "Spécifier 3.2 — Colisage et étiquetage",
+      "etat": "open",
+      "labels": [
+        "spec",
+        "couche/3-flux-sortants",
+        "module/3.2-colisage"
+      ],
+      "commentaires": 0,
+      "cree_le": "2026-09-02T10:12:00Z",
+      "jalon": "Couche 3 — Flux sortants"
+    },
+    {
+      "numero": 13,
+      "titre": "Spécifier 4.1 — Indicateurs d'activité",
+      "etat": "open",
+      "labels": [
+        "spec",
+        "couche/4-pilotage",
+        "module/4.1-indicateurs"
+      ],
+      "commentaires": 0,
+      "cree_le": "2026-09-02T10:13:00Z",
+      "jalon": "Couche 4 — Pilotage"
+    },
+    {
+      "numero": 14,
+      "titre": "L'avis de réception accepte une quantité attendue négative",
+      "etat": "open",
+      "labels": [
+        "bug",
+        "couche/1-flux-entrants",
+        "module/1.1-avis-de-reception"
+      ],
+      "commentaires": 3,
+      "cree_le": "2026-09-10T17:05:00Z",
+      "jalon": "Couche 1 — Flux entrants"
+    },
+    {
+      "numero": 15,
+      "titre": "Préciser le comportement d'un attendu partiellement reçu à la clôture",
+      "etat": "open",
+      "labels": [
+        "spec",
+        "couche/1-flux-entrants",
+        "module/1.1-avis-de-reception"
+      ],
+      "commentaires": 1,
+      "cree_le": "2026-09-10T17:20:00Z",
+      "jalon": "Couche 1 — Flux entrants"
+    },
+    {
+      "numero": 16,
+      "titre": "Mettre en place l'intégration continue",
+      "etat": "closed",
+      "labels": [
+        "tech"
+      ],
+      "commentaires": 2,
+      "cree_le": "2026-09-03T08:30:00Z"
+    },
+    {
+      "numero": 17,
+      "titre": "Le plan d'entrepôt ne s'affiche pas quand une allée ne porte aucun emplacement",
+      "etat": "closed",
+      "labels": [
+        "bug",
+        "couche/0-socle",
+        "module/0.3-adressage"
+      ],
+      "commentaires": 4,
+      "cree_le": "2026-09-07T15:45:00Z",
+      "jalon": "Couche 0 — Socle transverse"
+    },
+    {
+      "numero": 18,
+      "titre": "Définir les règles de cohabitation entre donneurs d'ordre dans une même zone logistique lorsque la zone est partagée entre plusieurs sites et que l'un d'eux applique un calendrier différent",
+      "etat": "open",
+      "labels": [
+        "spec",
+        "couche/0-socle",
+        "module/0.1-sites-et-organisation"
+      ],
+      "commentaires": 0,
+      "cree_le": "2026-09-11T11:11:00Z",
+      "jalon": "Couche 0 — Socle transverse"
+    },
+    {
+      "numero": 19,
+      "titre": "Préparer l'environnement de staging",
+      "etat": "open",
+      "labels": [
+        "tech"
+      ],
+      "commentaires": 0,
+      "cree_le": "2026-09-16T09:40:00Z"
+    },
+    {
+      "numero": 20,
+      "titre": "docs: précise l'adressage des emplacements en mezzanine",
+      "etat": "closed",
+      "labels": [],
+      "commentaires": 1,
+      "cree_le": "2026-09-08T12:00:00Z",
+      "pull_request": true
+    },
+    {
+      "numero": 21,
+      "titre": "Question ouverte : un article peut-il changer d'unité de stockage en cours de vie ?",
+      "etat": "open",
+      "labels": [
+        "spec",
+        "couche/0-socle",
+        "module/0.2-catalogue-articles"
+      ],
+      "commentaires": 5,
+      "cree_le": "2026-09-05T16:30:00Z",
+      "jalon": "Couche 0 — Socle transverse"
+    },
+    {
+      "numero": 22,
+      "titre": "Le contrôle qualité ignore la tolérance paramétrée par donneur d'ordre",
+      "etat": "open",
+      "labels": [
+        "bug",
+        "couche/1-flux-entrants",
+        "module/1.2-controle-qualite"
+      ],
+      "commentaires": 2,
+      "cree_le": "2026-09-12T10:20:00Z",
+      "jalon": "Couche 1 — Flux entrants"
+    },
+    {
+      "numero": 23,
+      "titre": "Idée : raccourcis clavier pour la saisie en réception",
+      "etat": "open",
+      "labels": [],
+      "commentaires": 0,
+      "cree_le": "2026-09-14T18:02:00Z"
+    },
+    {
+      "numero": 24,
+      "titre": "Journaliser les échanges avec les transporteurs",
+      "etat": "open",
+      "labels": [
+        "tech",
+        "couche/3-flux-sortants",
+        "module/3.2-colisage"
+      ],
+      "commentaires": 0,
+      "cree_le": "2026-09-15T14:25:00Z",
+      "jalon": "Couche 3 — Flux sortants"
+    },
+    {
+      "numero": 25,
+      "titre": "feat: avis de réception, première tranche",
+      "etat": "open",
+      "labels": [],
+      "commentaires": 6,
+      "cree_le": "2026-09-17T16:00:00Z",
+      "pull_request": true
+    },
+    {
+      "numero": 26,
+      "titre": "Rédiger le glossaire des supports consignés",
+      "etat": "closed",
+      "labels": [
+        "spec"
+      ],
+      "commentaires": 1,
+      "cree_le": "2026-09-04T10:00:00Z"
+    }
+  ]
+}

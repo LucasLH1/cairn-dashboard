@@ -8,6 +8,7 @@
   "packageManager": "npm@10.9.4",
   "scripts": {
     "dev": "nuxt dev",
+    "dev:fictif": "node scripts/dev/fictif.mjs",
     "build": "nuxt build",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",

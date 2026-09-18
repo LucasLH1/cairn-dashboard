@@ -19,7 +19,9 @@ const DELAI_INITIAL_MS = 1000
 const DELAI_MAXIMUM_MS = 30_000
 
 export function useFilDirect(surEvenement: (evenement: Record<string, unknown>) => void) {
-  const etat = ref<EtatFil>('ferme')
+  // L'état est partagé : l'en-tête montre si le fil est ouvert, la colonne
+  // latérale aussi, et une seule connexion les sert tous.
+  const etat = useEtatFil()
 
   let prise: WebSocket | null = null
   let minuteur: ReturnType<typeof setTimeout> | null = null
