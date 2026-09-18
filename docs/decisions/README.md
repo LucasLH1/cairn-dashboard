@@ -16,6 +16,7 @@ défaire à bon compte, et dont quelqu'un — dans six mois, ou six ans — voud
 | [0007](0007-historique-des-evenements.md) | Historique des événements | Le schéma de l'historique, et combien de temps il est conservé. |
 | [0008](0008-reception-des-evenements-de-session.md) | Réception des événements des sessions Claude Code | Par quel mécanisme les sessions alimentent le fil, ce qu'elles en disent et ce qu'elles taisent. |
 | [0009](0009-identite-des-evenements-de-session.md) | Identité et rangement des événements de session | Ce qui distingue deux événements de session, et comment le fil les regroupe. |
+| [0010](0010-developpement-local-sur-donnees-fictives.md) | Développement local sur données fictives | Comment voir l'interface changer sur le poste, sans GitHub ni secret, et sans rien ouvrir en production. |
 
 Ces décisions n'engagent que le dashboard. Elles ne tranchent rien pour cairn-wms, dont les choix se
 font dans son propre dépôt — et réciproquement.
