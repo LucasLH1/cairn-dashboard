@@ -20,6 +20,7 @@ d'environnement.
 | `server/` | Le serveur : routes `/version` et `/health`, utilitaires. |
 | `public/` | Fichiers servis tels quels : polices du design, favicon. |
 | `scripts/ci/` | `lint`, `test`, `smoke` — noms fixes appelés par les workflows. |
+| `scripts/dev/` | Développement local : faux GitHub et données fictives (`npm run dev:fictif`). |
 | `.github/workflows/` | `qualite.yml`, `image.yml`, `deploiement.yml`. |
 | `docs/cadrage.md` | Finalité, périmètre et principes du dashboard. |
 | `docs/deploiement.md` | Logique d'intégration et de déploiement. |
@@ -31,8 +32,27 @@ d'environnement.
 
 ## Mise en route
 
+Pour travailler sur l'interface, sans rien configurer :
+
 ```sh
 npm install
+npm run dev:fictif     # http://localhost:3000 — données fictives, aucun secret à saisir
+```
+
+Le dashboard tourne contre un faux GitHub local, sur des données fictives
+([fiche 0010](docs/decisions/0010-developpement-local-sur-donnees-fictives.md)). « Se connecter »
+fait entrer en un clic, chaque modification s'affiche aussitôt, et rien ne part vers GitHub.
+
+- `-- --scenario refus` (ou `quota`, `injoignable`, `illisible`, `vide`) : un état d'échec dès le
+  lancement. À chaud, depuis http://localhost:3999/_scenario ; le changement se voit en trente
+  secondes au plus.
+- `-- --fil 20` : un événement fictif de plus dans le fil toutes les vingt secondes.
+- Les données vivent dans `scripts/dev/donnees/` : les modifier, puis relancer.
+
+Sur les vraies données de cairn-wms, il faut un `.env` complet (voir `.env.example`), dont une OAuth
+App propre au poste avec l'URL de rappel `http://localhost:3000/auth/github`, puis :
+
+```sh
 cp .env.example .env   # puis renseigner les valeurs, le fichier n'est pas suivi
 npm run dev            # http://localhost:3000
 ```

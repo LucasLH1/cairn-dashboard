@@ -1,0 +1,223 @@
+{
+  "evenements": [
+    {
+      "source": "github",
+      "evenement": "push",
+      "charge": {
+        "ref": "refs/heads/dev",
+        "compare": "https://github.com/fictif/cairn-wms/compare/1a2b3c4...5d6e7f8",
+        "pusher": {
+          "name": "compte-fictif"
+        },
+        "commits": [
+          {
+            "message": "docs: spécifie l'adressage des emplacements"
+          },
+          {
+            "message": "docs: ajoute les cas de la mezzanine"
+          }
+        ],
+        "repository": {
+          "full_name": "fictif/cairn-wms"
+        },
+        "sender": {
+          "login": "compte-fictif"
+        }
+      }
+    },
+    {
+      "source": "github",
+      "evenement": "issues",
+      "charge": {
+        "action": "closed",
+        "issue": {
+          "number": 17,
+          "title": "Le plan d'entrepôt ne s'affiche pas quand une allée ne porte aucun emplacement",
+          "html_url": "https://github.com/fictif/cairn-wms/issues/17"
+        },
+        "repository": {
+          "full_name": "fictif/cairn-wms"
+        },
+        "sender": {
+          "login": "compte-fictif"
+        }
+      }
+    },
+    {
+      "source": "github",
+      "evenement": "workflow_run",
+      "charge": {
+        "action": "completed",
+        "workflow_run": {
+          "name": "qualite",
+          "conclusion": "success",
+          "html_url": "https://github.com/fictif/cairn-wms/actions/runs/1001"
+        },
+        "repository": {
+          "full_name": "fictif/cairn-wms"
+        },
+        "sender": {
+          "login": "compte-fictif"
+        }
+      }
+    },
+    {
+      "source": "claude-code",
+      "evenement": "SessionStart",
+      "session": "fictif-7c1e9a40-session",
+      "depot": "cairn-wms",
+      "outil": null,
+      "motif": "startup"
+    },
+    {
+      "source": "claude-code",
+      "evenement": "PostToolUse",
+      "session": "fictif-7c1e9a40-session",
+      "depot": "cairn-wms",
+      "outil": "Edit",
+      "motif": null
+    },
+    {
+      "source": "claude-code",
+      "evenement": "PostToolUse",
+      "session": "fictif-7c1e9a40-session",
+      "depot": "cairn-wms",
+      "outil": "Write",
+      "motif": null
+    },
+    {
+      "source": "claude-code",
+      "evenement": "Stop",
+      "session": "fictif-7c1e9a40-session",
+      "depot": "cairn-wms",
+      "outil": null,
+      "motif": null
+    },
+    {
+      "source": "claude-code",
+      "evenement": "SessionEnd",
+      "session": "fictif-7c1e9a40-session",
+      "depot": "cairn-wms",
+      "outil": null,
+      "motif": "prompt_input_exit"
+    },
+    {
+      "source": "github",
+      "evenement": "issues",
+      "charge": {
+        "action": "opened",
+        "issue": {
+          "number": 22,
+          "title": "Le contrôle qualité ignore la tolérance paramétrée par donneur d'ordre",
+          "html_url": "https://github.com/fictif/cairn-wms/issues/22"
+        },
+        "repository": {
+          "full_name": "fictif/cairn-wms"
+        },
+        "sender": {
+          "login": "compte-fictif"
+        }
+      }
+    },
+    {
+      "source": "github",
+      "evenement": "pull_request",
+      "charge": {
+        "action": "opened",
+        "pull_request": {
+          "number": 25,
+          "title": "feat: avis de réception, première tranche",
+          "html_url": "https://github.com/fictif/cairn-wms/pull/25"
+        },
+        "repository": {
+          "full_name": "fictif/cairn-wms"
+        },
+        "sender": {
+          "login": "compte-fictif"
+        }
+      }
+    },
+    {
+      "source": "github",
+      "evenement": "workflow_run",
+      "charge": {
+        "action": "completed",
+        "workflow_run": {
+          "name": "qualite",
+          "conclusion": "failure",
+          "html_url": "https://github.com/fictif/cairn-wms/actions/runs/1002"
+        },
+        "repository": {
+          "full_name": "fictif/cairn-wms"
+        },
+        "sender": {
+          "login": "compte-fictif"
+        }
+      }
+    },
+    {
+      "source": "claude-code",
+      "evenement": "SessionStart",
+      "session": "fictif-3f08b2d1-session",
+      "depot": "cairn-dashboard",
+      "outil": null,
+      "motif": "resume"
+    },
+    {
+      "source": "claude-code",
+      "evenement": "PostToolUse",
+      "session": "fictif-3f08b2d1-session",
+      "depot": "cairn-dashboard",
+      "outil": "Edit",
+      "motif": null
+    },
+    {
+      "source": "claude-code",
+      "evenement": "Stop",
+      "session": "fictif-3f08b2d1-session",
+      "depot": "cairn-dashboard",
+      "outil": null,
+      "motif": null
+    },
+    {
+      "source": "github",
+      "evenement": "push",
+      "charge": {
+        "ref": "refs/heads/dev",
+        "compare": "https://github.com/fictif/cairn-wms/compare/5d6e7f8...9a0b1c2",
+        "pusher": {
+          "name": "compte-fictif"
+        },
+        "commits": [
+          {
+            "message": "fix: refuse une quantité attendue négative\n\nCorps du commit, qui ne doit pas apparaître dans le fil."
+          }
+        ],
+        "repository": {
+          "full_name": "fictif/cairn-wms"
+        },
+        "sender": {
+          "login": "compte-fictif"
+        }
+      }
+    },
+    {
+      "source": "github",
+      "evenement": "issues",
+      "charge": {
+        "action": "opened",
+        "issue": {
+          "number": 24,
+          "title": "Journaliser les échanges avec les transporteurs",
+          "html_url": "https://github.com/fictif/cairn-wms/issues/24"
+        },
+        "repository": {
+          "full_name": "fictif/cairn-wms"
+        },
+        "sender": {
+          "login": "compte-fictif"
+        }
+      }
+    }
+  ]
+}

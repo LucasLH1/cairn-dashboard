@@ -1,5 +1,6 @@
 // Contrôle du jeton GitHub pour /health (docs/deploiement.md §2, fiche 0003) :
 // la sonde doit savoir dire non — 503 si le jeton est refusé.
+import { adresseApi } from './adresses-github'
 
 export type EtatGithub = 'ok' | 'non-configure' | 'refuse' | 'injoignable'
 
@@ -15,11 +16,12 @@ export async function verifierJetonGithub(
   jeton: string,
   depot: string,
   delaiMs = 5000,
+  api = adresseApi(),
 ): Promise<EtatGithub> {
   if (!jeton || !depot) return 'non-configure'
 
   try {
-    const reponse = await fetch(`https://api.github.com/repos/${depot}`, {
+    const reponse = await fetch(`${api}/repos/${depot}`, {
       headers: {
         'accept': 'application/vnd.github+json',
         'authorization': `Bearer ${jeton}`,

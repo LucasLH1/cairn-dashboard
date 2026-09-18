@@ -4,6 +4,7 @@
 //
 // Les échanges avec GitHub reçoivent leur fonction de requête en paramètre :
 // les tests les éprouvent avec un fournisseur simulé, sans identifiants réels.
+import { adresseApi, adresseWeb } from './adresses-github'
 
 export type Requeteur = typeof globalThis.fetch
 
@@ -21,7 +22,7 @@ export function estAutorise(id: unknown, idAutorise: string): boolean {
   return String(id) === attendu
 }
 
-export function urlAutorisation(clientId: string, urlRappel: string, etat: string): string {
+export function urlAutorisation(clientId: string, urlRappel: string, etat: string, web = adresseWeb()): string {
   const parametres = new URLSearchParams({
     client_id: clientId,
     redirect_uri: urlRappel,
@@ -30,16 +31,17 @@ export function urlAutorisation(clientId: string, urlRappel: string, etat: strin
     scope: '',
     allow_signup: 'false',
   })
-  return `https://github.com/login/oauth/authorize?${parametres}`
+  return `${web}/login/oauth/authorize?${parametres}`
 }
 
 /** Échange le code reçu contre un jeton d'accès. Renvoie null si GitHub refuse. */
 export async function echangerCode(
   requeteur: Requeteur,
   options: { clientId: string, clientSecret: string, code: string, urlRappel: string },
+  web = adresseWeb(),
 ): Promise<string | null> {
   try {
-    const reponse = await requeteur('https://github.com/login/oauth/access_token', {
+    const reponse = await requeteur(`${web}/login/oauth/access_token`, {
       method: 'POST',
       headers: { 'accept': 'application/json', 'content-type': 'application/json' },
       body: JSON.stringify({
@@ -63,9 +65,10 @@ export async function echangerCode(
 export async function lireUtilisateur(
   requeteur: Requeteur,
   jeton: string,
+  api = adresseApi(),
 ): Promise<UtilisateurGithub | null> {
   try {
-    const reponse = await requeteur('https://api.github.com/user', {
+    const reponse = await requeteur(`${api}/user`, {
       headers: {
         'accept': 'application/vnd.github+json',
         'authorization': `Bearer ${jeton}`,
