@@ -83,7 +83,7 @@ tranches:
 
   - id: "7"
     nom: Connecteur MCP avec OAuth
-    etat: en développement
+    etat: livré
     issue: 7
     label: tranche/7-connecteur-mcp
 
