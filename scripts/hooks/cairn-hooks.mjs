@@ -15,9 +15,10 @@
 // `background_tasks[].command` et `session_crons[].prompt`. Seuls les champs
 // listés ici sortent du poste.
 import { createHash } from 'node:crypto'
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { dirname, join, basename } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 /** Les quatre événements retenus par la fiche 0008. */
 const EVENEMENTS = ['SessionStart', 'SessionEnd', 'Stop', 'PostToolUse']
@@ -169,8 +170,25 @@ async function principal() {
   if (message.evenement === 'SessionEnd') oublierCompteur(session)
 }
 
-// Exécuté seulement quand le script est lancé, pas quand il est importé par un
-// test : la construction du message doit pouvoir s'éprouver sans rien envoyer.
-if (process.argv[1] && process.argv[1].endsWith('cairn-hooks.mjs')) {
+/**
+ * Vrai si ce fichier est le programme lancé, et non un module importé.
+ *
+ * On compare les **chemins réels**, jamais les noms. Un premier garde-fou
+ * testait le nom `cairn-hooks.mjs` ; or l'installateur copie le script sous
+ * `cairn-hooks`, sans extension. La copie installée était donc inerte — en
+ * silence, puisqu'un hook ne doit jamais échouer —, et les tests ne l'ont pas
+ * vu parce qu'ils lançaient le fichier du dépôt, qui portait le bon nom.
+ */
+function estLeProgramme() {
+  if (!process.argv[1]) return false
+  try {
+    return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))
+  }
+  catch {
+    return false
+  }
+}
+
+if (estLeProgramme()) {
   principal().catch(() => {}).finally(() => process.exit(0))
 }
