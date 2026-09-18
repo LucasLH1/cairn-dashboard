@@ -75,10 +75,24 @@ fictif, pour que Lucas puisse trancher avant toute mise en production.
   résoudre `NuxtLink` par son nom, il faut l'importer de `#components` — et prouvé disparu par un
   rechargement témoin.
 
-### Ce que Lucas voit déjà
+### Le regard de Lucas, et deux retouches
 
-Son `npm run dev:fictif` sert cet arbre de travail à chaud : http://localhost:3000 montre l'état
-de fin de session.
+Son `npm run dev:fictif` sert cet arbre de travail à chaud : il a regardé http://localhost:3000
+et jugé le résultat bon (« c'est niquel »), avec deux demandes, faites aussitôt :
+
+- **la colonne latérale, « un peu plus large »** : sa base de flex passe de 292 px, la valeur du
+  design, à 324 px ;
+- **le thème clair, « trop clair »** — précisément le point que j'avais signalé : le design garde
+  son pourtour sombre dans les deux thèmes, et la tranche 1c l'avait remplacé par un fond clair.
+  Le fond de page et l'ombre du cadre redeviennent ceux du design, dans les deux thèmes. L'écart de
+  la 1c disparaît. Sur les écrans d'accès, la carte flotte désormais sur ce fond sombre, à côté du
+  panneau clair — à valider.
+- **Le sombre reste le défaut, quel que soit le réglage du système** — « on garde dark theme par
+  défaut ». L'application ne consulte plus `prefers-color-scheme` : le clair ne s'obtient que par
+  le sélecteur, et le choix est retenu sur le poste. C'est aussi le comportement du design, dont
+  le thème de départ est le sombre.
+
+Vérifié sur captures dans les deux thèmes, lint, typage.
 
 ## Décisions
 
@@ -108,8 +122,10 @@ Aucune fiche : aucune dépendance, aucun choix engageant. Tout ce qui suit relè
   (celle des tuiles d'alerte) : elles portent des titres longs, pas « 12 j ».
 - **La carte « Ce qui vient ensuite » disparaît** : le design n'a pas de bloc pour elle, et
   `status.yml` porte déjà l'information.
-- **Le fond de page du thème clair** reste celui rebâti en 1c : le pourtour sombre du design est le
-  décor de sa vitrine.
+- **La colonne latérale fait 324 px, non 292** : demandé par Lucas, à l'usage. Seule mesure du
+  design qui n'est pas reprise telle quelle.
+- **Le sombre est le thème par défaut, sans consulter le système** : demandé par Lucas ; c'est le
+  comportement du design.
 - **Deux ajouts d'interface, avec les briques du design** : le champ « Rechercher » filtre la
   navigation de la documentation sur le poste (`⌘K` et `Ctrl+K` le prennent), et le point de
   présence de l'avatar dit si le fil en direct est ouvert — le seul « en ligne » qui ait un sens.
@@ -125,6 +141,7 @@ Aucune fiche : aucune dépendance, aucun choix engageant. Tout ce qui suit relè
 | `app/layouts/default.vue` | Le contenu se partage entre la zone principale et la colonne latérale. |
 | `app/components/AppLateral.vue` | Créé. La colonne latérale : fil en direct, barres, anneau, tuiles. |
 | `app/components/AppHeader.vue` | Point de présence sur l'avatar, hauteur et remplissage du design. |
+| `app/components/ThemeToggle.vue`, `app/plugins/theme.client.ts` | Sans choix enregistré, le sombre ; le système n'est plus consulté. |
 | `app/components/BaseCard.vue`, `EtatVide.vue`, `EtatEchec.vue` | Les deux en-têtes du design ; les états sur la tuile cernée. |
 | `app/components/{AnneauParts,BarresActivite,BaseEtiquette,BaseTuile,BoutonPrimaire,BoutonSecondaire,ControleSegmente,GrosChiffre,LienChevron,LigneListe,SemaineGrille,ZonePrincipale}.vue` | Créés. Les briques, aux mesures du gabarit. |
 | `app/components/DocLecture.vue` | Créé. La vue Documentation : navigation, article, « Sur cette page ». |
@@ -135,7 +152,7 @@ Aucune fiche : aucune dépendance, aucun choix engageant. Tout ce qui suit relè
 | `app/utils/temps.ts` | Créé. Dates, heures, semaine, durées, telles que les écrans les disent. |
 | `scripts/visuel/captures.mjs` | Tous les écrans, les deux vues du design. |
 | `scripts/dev/fictif.mjs` | Secret de session fourni par l'environnement, pour l'épreuve visuelle. |
-| `journal/captures/2026-09-18-tranche-6b/` | Huit captures : accueil et documentation, 1440 et 390 px, sombre et clair — sur données fictives. |
+| `journal/captures/2026-09-18-tranche-6b/` | Huit captures : accueil et documentation, 1440 et 390 px, sombre et clair — sur données fictives, après les retouches. |
 
 ## Issues liées
 
@@ -143,8 +160,10 @@ Aucune fiche : aucune dépendance, aucun choix engageant. Tout ce qui suit relè
 
 ## Points ouverts
 
-- **La tranche n'est pas livrée.** Il manque le regard de Lucas sur ces écrans, ses retouches, puis
-  la pull request vers `main` — décision humaine — et la mise en production.
+- **La tranche n'est pas livrée.** Lucas a validé le rendu sur le poste ; il reste la pull request
+  vers `main` — décision humaine — et la mise en production.
+- **L'écran de connexion en thème clair** — carte sur fond sombre à côté du panneau clair — n'a pas
+  encore été vu par Lucas.
 - **Les captures jointes sont prises sur les données fictives**, pas sur l'écran réel connecté que
   la règle 7 exige pour livrer. Elles montrent la forme ; la preuve de livraison se refera sur la
   production.

@@ -2,8 +2,8 @@
    design/cairn-design-system.html, gabarit décodé, valeur par valeur. Imposés
    par la règle 7 de CLAUDE.md : on les reprend tels quels, on n'en invente pas.
 
-   Le design porte deux thèmes. Le sombre est celui par défaut ; le clair
-   reprend les mêmes rôles. Le choix du visiteur prime sur celui du système. */
+   Le design porte deux thèmes. Le sombre est celui par défaut, quel que soit
+   le réglage du système ; le clair reprend les mêmes rôles, par le sélecteur. */
 
 :root {
   color-scheme: dark;
@@ -130,7 +130,8 @@
   /* Colonnes : le contenu principal, la colonne latérale, la navigation et la
      table des matières de la documentation — les bases de flex du design */
   --w-principal: 620px;
-  --w-lateral: 292px;
+  /* 292 px dans le design ; élargie à la demande de Lucas (journal du 2026-09-18). */
+  --w-lateral: 324px;
   --w-lateral-bloc: 258px;
   --w-nav-doc: 248px;
   --w-toc-doc: 236px;
@@ -139,7 +140,9 @@
   --font-mono: ui-monospace, monospace;
 }
 
-/* Thème clair du design */
+/* Thème clair du design. Il ne s'obtient que par le sélecteur : le sombre est
+   le thème par défaut, quel que soit le réglage du système — comme dans le
+   design, qui ne le suit pas non plus. */
 :root[data-theme='light'] {
   color-scheme: light;
 
@@ -154,39 +157,13 @@
   --c-muted: #6b7178;
   --c-dim: #8b9199;
 
-  /* Le design ne donne pas de fond de page clair : ses maquettes gardent un
-     pourtour sombre, qui est le décor de la vitrine, pas un jeton de thème.
-     On le rebâtit avec les couleurs claires du design (règle 7). */
-  --g-page: radial-gradient(900px 520px at 50% -10%, #ffffff, #f2f3f5 60%, #e7e8ec);
-  --sh-frame: 0 40px 90px rgba(16, 18, 24, 0.12);
+  /* Le fond de page et l'ombre du cadre restent ceux du sombre : le design
+     garde son pourtour sombre dans les deux thèmes, et c'est ce pourtour qui
+     donne au thème clair son contraste. La tranche 1c l'avait éclairci ; Lucas
+     a demandé de revenir au design (journal du 2026-09-18). */
 
   --g-barre: linear-gradient(180deg, var(--c-tile), rgba(200, 203, 208, 0.35));
 
   --c-bascule: #ffffff;
   --sh-bascule: 0 1px 3px rgba(0, 0, 0, 0.14);
-}
-
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme='dark']) {
-    color-scheme: light;
-
-    --c-side: #fcfcfd;
-    --c-rail: #f1f1f3;
-    --c-window: #f8f8f9;
-    --c-card: #ffffff;
-    --c-tile: #f3f4f5;
-
-    --c-border: #e6e7ea;
-    --c-text: #1a1c1f;
-    --c-muted: #6b7178;
-    --c-dim: #8b9199;
-
-    --g-page: radial-gradient(900px 520px at 50% -10%, #ffffff, #f2f3f5 60%, #e7e8ec);
-    --sh-frame: 0 40px 90px rgba(16, 18, 24, 0.12);
-
-    --g-barre: linear-gradient(180deg, var(--c-tile), rgba(200, 203, 208, 0.35));
-
-    --c-bascule: #ffffff;
-    --sh-bascule: 0 1px 3px rgba(0, 0, 0, 0.14);
-  }
 }
