@@ -76,8 +76,8 @@ tranches:
     label: tranche/6-hooks-claude-code
 
   - id: "6b"
-    nom: Refonte du design
-    etat: à faire
+    nom: Reproduction fidèle du design
+    etat: en développement
     issue: 23
     label: tranche/6b-refonte-design
 

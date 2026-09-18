@@ -6,6 +6,9 @@
 //
 // Options : --port (3000), --port-faux (3999), --scenario (nominal), --fil (0 : éteint).
 //
+// Pour l'épreuve visuelle (règle 7) : NUXT_SESSION_PASSWORD=… npm run dev:fictif, puis
+// NUXT_SESSION_PASSWORD=… NUXT_ALLOWED_GITHUB_ID=4242 npm run visuel -- --base http://127.0.0.1:3000
+//
 // Lance le faux GitHub et `nuxt dev`, puis amorce le fil. **Aucune valeur à
 // saisir** : les secrets sont tirés au hasard à chaque lancement et ne sont écrits
 // nulle part — ils ne protègent qu'un faux. Un redémarrage demande donc de se
@@ -77,7 +80,9 @@ const nuxt = spawn(process.execPath, [NUXT, 'dev', '--port', String(port)], {
     NUXT_GITHUB_REPO: 'fictif/cairn-wms',
     NUXT_OAUTH_GITHUB_CLIENT_ID: 'fictif',
     NUXT_OAUTH_GITHUB_CLIENT_SECRET: hasard(24),
-    NUXT_SESSION_PASSWORD: hasard(48),
+    // Fourni par l'environnement quand l'épreuve visuelle doit forger une session
+    // (scripts/visuel/captures.mjs) ; tiré au hasard sinon.
+    NUXT_SESSION_PASSWORD: process.env.NUXT_SESSION_PASSWORD || hasard(48),
     NUXT_ALLOWED_GITHUB_ID: String(ID_FICTIF),
     NUXT_BASE_FICHIER: BASE_FICTIVE,
     NUXT_WEBHOOK_SECRET: secrets.webhook,
