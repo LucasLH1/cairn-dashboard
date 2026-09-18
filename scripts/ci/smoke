@@ -25,6 +25,11 @@ MDP_SESSION="$(head -c 48 /dev/urandom | base64 | tr -d '\n')"
 ID_AUTORISE=68059501
 SECRET_HOOKS="$(head -c 32 /dev/urandom | base64 | tr -d '\n')"
 
+# Le connecteur MCP (fiche 0011) : un client connu, un secret de signature.
+CLIENT_MCP="client-epreuve"
+SECRET_MCP="$(head -c 48 /dev/urandom | base64 | tr -d '\n')"
+RAPPEL_CLAUDE="https://claude.ai/api/mcp/auth_callback"
+
 # Adresses de GitHub substituables en développement seulement (fiche 0010). Le
 # conteneur nominal les reçoit, pointées vers une adresse où rien n'écoute :
 # l'image doit les ignorer. Si elle les suivait, /health tomberait à 503 et la
@@ -44,6 +49,8 @@ demarrer() { # $1 = jeton de lecture, $2 = secret de session (défaut : le bon)
     -e "NUXT_OAUTH_GITHUB_CLIENT_ID=epreuve" \
     -e "NUXT_OAUTH_GITHUB_CLIENT_SECRET=epreuve" \
     -e "NUXT_HOOKS_SECRET=${SECRET_HOOKS}" \
+    -e "NUXT_MCP_CLIENT_ID=${CLIENT_MCP}" \
+    -e "NUXT_MCP_SECRET=${SECRET_MCP}" \
     -e "NUXT_GITHUB_API_URL=${LEURRE}" \
     -e "NUXT_GITHUB_WEB_URL=${LEURRE}" \
     "$IMAGE" >/dev/null
@@ -171,6 +178,122 @@ case "$(cat /tmp/smoke-corps)" in
   *) echo "une clé déjà connue aurait dû être écartée : $(cat /tmp/smoke-corps)"; exit 1 ;;
 esac
 
+# Le connecteur MCP (fiche 0011) : sa découverte, ses refus, puis le parcours
+# complet — consentement du compte autorisé, code contre jetons, appel MCP,
+# rotation du jeton de rafraîchissement. Rien n'est écrit dans cairn-wms : seuls
+# les outils de lecture sont appelés.
+echo "== le connecteur MCP se découvre, et refuse ce qui n'est pas autorisé"
+verifier_code /.well-known/oauth-protected-resource/mcp 200 "métadonnées de ressource"
+case "$(cat /tmp/smoke-corps)" in
+  *"\"resource\":\"${BASE}/mcp\""*) echo "   ressource : ${BASE}/mcp" ;;
+  *) echo "les métadonnées devraient désigner ${BASE}/mcp : $(cat /tmp/smoke-corps)"; exit 1 ;;
+esac
+verifier_code /.well-known/oauth-authorization-server 200 "métadonnées du serveur d'autorisation"
+case "$(cat /tmp/smoke-corps)" in
+  *'"code_challenge_methods_supported":["S256"]'*) echo "   PKCE S256 annoncé" ;;
+  *) echo "les métadonnées devraient annoncer S256 : $(cat /tmp/smoke-corps)"; exit 1 ;;
+esac
+
+DEFI_MCP=$(curl -s -o /tmp/smoke-corps -m 10 -D - -X POST -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize"}' "${BASE}/mcp" | tr -d '\r' | grep -i '^www-authenticate:' || true)
+CODE=$(curl -s -o /dev/null -m 10 -w '%{http_code}' -X POST -H 'content-type: application/json' -d '{}' "${BASE}/mcp")
+case "${CODE}:${DEFI_MCP}" in
+  401:*resource_metadata=*) echo "   sans jeton : 401 · ${DEFI_MCP#*: }" ;;
+  *) echo "sans jeton, le serveur MCP devrait répondre 401 avec WWW-Authenticate (obtenu ${CODE} ${DEFI_MCP})"; exit 1 ;;
+esac
+CODE=$(curl -s -o /tmp/smoke-corps -m 10 -w '%{http_code}' -X POST -H 'content-type: application/json' \
+  -H 'authorization: Bearer n.importe.quoi' -d '{}' "${BASE}/mcp")
+if [ "$CODE" != "401" ]; then echo "jeton bidon : attendu 401, obtenu $CODE"; exit 1; fi
+echo "   jeton bidon : 401 · $(cat /tmp/smoke-corps)"
+CODE=$(curl -s -o /tmp/smoke-corps -m 10 -w '%{http_code}' -X POST -H 'content-type: application/x-www-form-urlencoded' \
+  -d "grant_type=authorization_code&client_id=autre&code=x&code_verifier=y" "${BASE}/oauth/jeton")
+case "${CODE}:$(cat /tmp/smoke-corps)" in
+  401:*invalid_client*) echo "   client inconnu au jeton : 401 invalid_client" ;;
+  *) echo "un client inconnu devrait recevoir 401 invalid_client (obtenu ${CODE} $(cat /tmp/smoke-corps))"; exit 1 ;;
+esac
+CODE=$(curl -s -o /dev/null -m 10 -w '%{http_code}' "${BASE}/oauth/autoriser?client_id=autre&redirect_uri=${RAPPEL_CLAUDE}&response_type=code")
+if [ "$CODE" != "400" ]; then echo "un client inconnu à l'autorisation devrait être refusé sur place (400), obtenu $CODE"; exit 1; fi
+echo "   client inconnu à l'autorisation : 400, sans redirection"
+
+echo "== le parcours OAuth du connecteur, de bout en bout"
+VERIFICATEUR=$(head -c 48 /dev/urandom | base64 | tr '+/' '-_' | tr -d '=\n')
+DEFI=$(printf '%s' "$VERIFICATEUR" | openssl dgst -sha256 -binary | base64 | tr '+/' '-_' | tr -d '=\n')
+AUTORISER="${BASE}/oauth/autoriser?client_id=${CLIENT_MCP}&redirect_uri=${RAPPEL_CLAUDE}&response_type=code&code_challenge=${DEFI}&code_challenge_method=S256&resource=${BASE}/mcp&state=etat-epreuve"
+CIBLE=$(curl -s -o /dev/null -m 10 -w '%{redirect_url}' "$AUTORISER")
+case "$CIBLE" in
+  */auth/github?retour=*) echo "   sans session : mène à la connexion, avec retour" ;;
+  *) echo "sans session, l'autorisation devrait mener à la connexion (obtenu '${CIBLE}')"; exit 1 ;;
+esac
+curl -s -o /dev/null -m 10 -D /tmp/smoke-entetes -b "cairn_session=${SESSION_BONNE}" "$AUTORISER"
+COOKIE_DEMANDE=$(tr -d '\r' < /tmp/smoke-entetes | grep -i '^set-cookie: cairn_mcp_demande=' | head -1 | sed 's/^[Ss]et-[Cc]ookie: //; s/;.*//')
+case "$(tr -d '\r' < /tmp/smoke-entetes | grep -i '^location:')" in
+  *"/connecteur/consentement"*) [ -n "$COOKIE_DEMANDE" ] && echo "   avec la session du compte autorisé : vers le consentement, demande scellée" ;;
+  *) echo "avec session, l'autorisation devrait mener au consentement : $(grep -i '^location:' /tmp/smoke-entetes)"; exit 1 ;;
+esac
+CODE=$(curl -s -o /dev/null -m 10 -w '%{http_code}' -X POST -b "cairn_session=${SESSION_BONNE}; ${COOKIE_DEMANDE}" \
+  -H 'content-type: application/x-www-form-urlencoded' -d 'decision=accepter' "${BASE}/oauth/autoriser")
+if [ "$CODE" != "403" ]; then echo "un consentement sans origine devrait être refusé (403), obtenu $CODE"; exit 1; fi
+echo "   consentement sans origine : 403"
+RETOUR=$(curl -s -o /dev/null -m 10 -w '%{redirect_url}' -X POST -b "cairn_session=${SESSION_BONNE}; ${COOKIE_DEMANDE}" \
+  -H "origin: ${BASE}" -H 'content-type: application/x-www-form-urlencoded' -d 'decision=accepter' "${BASE}/oauth/autoriser")
+CODE_OAUTH=$(printf '%s' "$RETOUR" | sed -n 's/.*[?&]code=\([^&]*\).*/\1/p')
+case "$RETOUR" in
+  "${RAPPEL_CLAUDE}?"*state=etat-epreuve*) [ -n "$CODE_OAUTH" ] && echo "   consentement accordé : code renvoyé vers claude.ai avec l'état" ;;
+  *) echo "le consentement devrait renvoyer un code vers ${RAPPEL_CLAUDE} (obtenu '${RETOUR}')"; exit 1 ;;
+esac
+CODE=$(curl -s -o /tmp/smoke-corps -m 10 -w '%{http_code}' -X POST -H 'content-type: application/x-www-form-urlencoded' \
+  -d "grant_type=authorization_code&client_id=${CLIENT_MCP}&code=${CODE_OAUTH}&code_verifier=faux-verificateur-faux-verificateur-faux-verificateur-faux&redirect_uri=${RAPPEL_CLAUDE}" "${BASE}/oauth/jeton")
+case "${CODE}:$(cat /tmp/smoke-corps)" in
+  400:*invalid_grant*) echo "   mauvais vérificateur PKCE : invalid_grant, code consommé" ;;
+  *) echo "un mauvais vérificateur devrait rendre invalid_grant (obtenu ${CODE} $(cat /tmp/smoke-corps))"; exit 1 ;;
+esac
+# Le code est consommé : nouveau consentement pour un code propre.
+curl -s -o /dev/null -m 10 -D /tmp/smoke-entetes -b "cairn_session=${SESSION_BONNE}" "$AUTORISER"
+COOKIE_DEMANDE=$(tr -d '\r' < /tmp/smoke-entetes | grep -i '^set-cookie: cairn_mcp_demande=' | head -1 | sed 's/^[Ss]et-[Cc]ookie: //; s/;.*//')
+RETOUR=$(curl -s -o /dev/null -m 10 -w '%{redirect_url}' -X POST -b "cairn_session=${SESSION_BONNE}; ${COOKIE_DEMANDE}" \
+  -H "origin: ${BASE}" -H 'content-type: application/x-www-form-urlencoded' -d 'decision=accepter' "${BASE}/oauth/autoriser")
+CODE_OAUTH=$(printf '%s' "$RETOUR" | sed -n 's/.*[?&]code=\([^&]*\).*/\1/p')
+CODE=$(curl -s -o /tmp/smoke-corps -m 10 -w '%{http_code}' -X POST -H 'content-type: application/x-www-form-urlencoded' \
+  -d "grant_type=authorization_code&client_id=${CLIENT_MCP}&code=${CODE_OAUTH}&code_verifier=${VERIFICATEUR}&redirect_uri=${RAPPEL_CLAUDE}&resource=${BASE}/mcp" "${BASE}/oauth/jeton")
+if [ "$CODE" != "200" ]; then echo "l'échange du code devrait réussir (obtenu ${CODE} $(cat /tmp/smoke-corps))"; exit 1; fi
+ACCES=$(sed -n 's/.*"access_token":"\([^"]*\)".*/\1/p' /tmp/smoke-corps)
+RAFRAICHISSEMENT=$(sed -n 's/.*"refresh_token":"\([^"]*\)".*/\1/p' /tmp/smoke-corps)
+[ -n "$ACCES" ] && [ -n "$RAFRAICHISSEMENT" ] || { echo "jetons absents de la réponse : $(cat /tmp/smoke-corps)"; exit 1; }
+echo "   code échangé : jeton d'accès et jeton de rafraîchissement"
+CODE=$(curl -s -o /tmp/smoke-corps -m 20 -w '%{http_code}' -X POST -H 'content-type: application/json' \
+  -H 'accept: application/json, text/event-stream' -H "authorization: Bearer ${ACCES}" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' "${BASE}/mcp")
+case "${CODE}:$(cat /tmp/smoke-corps)" in
+  200:*lister_documents*lire_document*ecrire_document*) echo "   tools/list avec le jeton : les trois outils" ;;
+  *) echo "tools/list devrait rendre les trois outils (obtenu ${CODE} $(head -c 300 /tmp/smoke-corps))"; exit 1 ;;
+esac
+CODE=$(curl -s -o /tmp/smoke-corps -m 20 -w '%{http_code}' -X POST -H 'content-type: application/json' \
+  -H 'accept: application/json, text/event-stream' -H "authorization: Bearer ${ACCES}" \
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"lister_documents","arguments":{}}}' "${BASE}/mcp")
+case "${CODE}:$(cat /tmp/smoke-corps)" in
+  200:*".md"*) echo "   lister_documents : l'arbre réel de docs/" ;;
+  *) echo "lister_documents devrait rendre des documents (obtenu ${CODE} $(head -c 300 /tmp/smoke-corps))"; exit 1 ;;
+esac
+CODE=$(curl -s -o /tmp/smoke-corps -m 10 -w '%{http_code}' -X POST -H 'content-type: application/x-www-form-urlencoded' \
+  -d "grant_type=refresh_token&client_id=${CLIENT_MCP}&refresh_token=${RAFRAICHISSEMENT}" "${BASE}/oauth/jeton")
+NOUVEAU=$(sed -n 's/.*"refresh_token":"\([^"]*\)".*/\1/p' /tmp/smoke-corps)
+if [ "$CODE" != "200" ] || [ -z "$NOUVEAU" ] || [ "$NOUVEAU" = "$RAFRAICHISSEMENT" ]; then
+  echo "le rafraîchissement devrait tourner le jeton (obtenu ${CODE} $(head -c 200 /tmp/smoke-corps))"; exit 1
+fi
+echo "   rafraîchissement : jeton tourné"
+CODE=$(curl -s -o /tmp/smoke-corps -m 10 -w '%{http_code}' -X POST -H 'content-type: application/x-www-form-urlencoded' \
+  -d "grant_type=refresh_token&client_id=${CLIENT_MCP}&refresh_token=${RAFRAICHISSEMENT}" "${BASE}/oauth/jeton")
+case "${CODE}:$(cat /tmp/smoke-corps)" in
+  400:*invalid_grant*) echo "   ancien jeton représenté : invalid_grant" ;;
+  *) echo "un jeton déjà tourné devrait être refusé (obtenu ${CODE} $(cat /tmp/smoke-corps))"; exit 1 ;;
+esac
+CODE=$(curl -s -o /tmp/smoke-corps -m 10 -w '%{http_code}' -X POST -H 'content-type: application/x-www-form-urlencoded' \
+  -d "grant_type=refresh_token&client_id=${CLIENT_MCP}&refresh_token=${NOUVEAU}" "${BASE}/oauth/jeton")
+case "${CODE}:$(cat /tmp/smoke-corps)" in
+  400:*invalid_grant*) echo "   famille révoquée après le rejeu : le nouveau ne vaut plus" ;;
+  *) echo "après un rejeu, toute la famille devrait être révoquée (obtenu ${CODE} $(cat /tmp/smoke-corps))"; exit 1 ;;
+esac
+
 echo "== configuration de connexion incomplète : l'application se déclare malsaine"
 demarrer "${NUXT_GITHUB_TOKEN}" "trop-court-16car"
 attendre
@@ -202,6 +325,10 @@ if [ "$CODE" != "503" ]; then
   exit 1
 fi
 echo "   /health : 503 · $(cat /tmp/smoke-corps)"
+case "$(cat /tmp/smoke-corps)" in
+  *'"connecteur":"client-absent"'*) echo "   connecteur non configuré : signalé" ;;
+  *) echo "sans NUXT_MCP_CLIENT_ID, /health devrait signaler le connecteur : $(cat /tmp/smoke-corps)"; exit 1 ;;
+esac
 verifier_code /live 200 "/live"
 
 # Ce conteneur-ci n'a pas de secret de hooks : la porte doit se déclarer non

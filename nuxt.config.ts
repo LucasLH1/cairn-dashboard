@@ -30,6 +30,12 @@ export default defineNuxtConfig({
     // Secret partagé avec les hooks Claude Code des deux dépôts suivis
     // (fiche 0008). Sans lui, la route de réception n'accepte rien.
     hooksSecret: '',
+    // Le connecteur MCP (fiche 0011) : l'identifiant du seul client autorisé,
+    // Claude — public, saisi dans les paramètres avancés du connecteur — et le
+    // secret qui signe ses jetons d'accès. Sans eux, le connecteur ne délivre
+    // rien, et /health le dit.
+    mcpClientId: '',
+    mcpSecret: '',
     oauth: {
       github: {
         clientId: '',

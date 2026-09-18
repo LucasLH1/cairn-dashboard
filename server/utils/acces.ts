@@ -8,6 +8,9 @@ const CHEMINS_EXACTS = new Set([
   '/connexion',
   '/refus',
   '/favicon.svg',
+  // Le serveur MCP (fiche 0011) : Claude n'a pas de session. Sa protection est
+  // le jeton d'accès Bearer, vérifié à chaque requête (server/routes/mcp.ts).
+  '/mcp',
 ])
 
 const PREFIXES = [
@@ -23,6 +26,12 @@ const PREFIXES = [
   // constant, taille bornée, débit limité, message reconstruit depuis une liste
   // blanche (server/utils/hooks.ts, fiches 0008 et 0009).
   '/hooks/',
+  // Les métadonnées de découverte OAuth (RFC 9728 et 8414) et le serveur
+  // d'autorisation du connecteur (fiche 0011). Le point d'autorisation, lui,
+  // exige le compte autorisé : il l'obtient par le parcours de connexion, puis
+  // revient ; le point de jeton est protégé par le code et par PKCE.
+  '/.well-known/',
+  '/oauth/',
 ]
 
 /** Vrai si ce chemin répond sans session ouverte. */

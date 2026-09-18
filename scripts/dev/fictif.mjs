@@ -33,6 +33,9 @@ const BASE_FICTIVE = resolve(RACINE, '.data/fictif.db')
 /** Identifiant du compte fictif : celui que le faux GitHub rend, et le seul autorisé. */
 const ID_FICTIF = 4242
 
+/** L'identifiant client du connecteur MCP, en mode fictif. */
+const CLIENT_MCP_FICTIF = 'client-fictif'
+
 function option(nom, defaut) {
   const i = process.argv.indexOf(`--${nom}`)
   return i === -1 ? defaut : process.argv[i + 1]
@@ -87,6 +90,11 @@ const nuxt = spawn(process.execPath, [NUXT, 'dev', '--port', String(port)], {
     NUXT_BASE_FICHIER: BASE_FICTIVE,
     NUXT_WEBHOOK_SECRET: secrets.webhook,
     NUXT_HOOKS_SECRET: secrets.hooks,
+    // Le connecteur MCP (fiche 0011) : un identifiant client connu, pour que
+    // l'épreuve puisse jouer le parcours OAuth, et un secret de signature tiré
+    // au hasard.
+    NUXT_MCP_CLIENT_ID: CLIENT_MCP_FICTIF,
+    NUXT_MCP_SECRET: hasard(48),
     APP_COMMIT: 'fictif',
   },
 })
@@ -139,6 +147,7 @@ try {
               « Se connecter » : un clic, rien à saisir.
   Scénario    ${scenario} — pour en changer : ${webFaux}/_scenario
   Fil         ${amorces} événements amorcés${cadence > 0 ? `, un de plus toutes les ${cadence} s` : ''}
+  Connecteur  ${base}/mcp — identifiant client « ${CLIENT_MCP_FICTIF} », métadonnées sous ${base}/.well-known/
 
   Rien ne part vers GitHub. Ctrl+C pour arrêter.
 ────────────────────────────────────────────────────────────────

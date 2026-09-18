@@ -77,13 +77,13 @@ tranches:
 
   - id: "6b"
     nom: Reproduction fidèle du design
-    etat: en développement
+    etat: livré
     issue: 23
     label: tranche/6b-refonte-design
 
   - id: "7"
     nom: Connecteur MCP avec OAuth
-    etat: à faire
+    etat: en développement
     issue: 7
     label: tranche/7-connecteur-mcp
 

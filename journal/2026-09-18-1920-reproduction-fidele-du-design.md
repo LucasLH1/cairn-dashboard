@@ -102,6 +102,24 @@ et jugé le résultat bon (« c'est niquel »), avec deux demandes, faites aussi
 
 Vérifié sur captures dans les deux thèmes, lint, typage.
 
+### Livraison
+
+- **Lucas a fusionné la pull request #24** (`dev` → `main`, commit de fusion `71122a3`).
+  `deploiement.yml` a déployé le SHA de tête `5b9090a` ; `/health` à 200 au premier essai.
+- **Vérifié de l'extérieur** : `/version` sert `5b9090a`, `/health` et `/live` répondent 200 ; la
+  feuille de style servie ne contient plus de `prefers-color-scheme` ; sans choix enregistré et
+  système réglé en clair, la production rend le sombre — attribut absent, fond `#0e0f11` —,
+  vérifié par Playwright.
+- **Épreuve visuelle sur l'écran réel, connecté.** L'image exacte de production
+  (`ghcr.io/lucaslh1/cairn-dashboard:5b9090a…`) lancée sur le poste avec le jeton GitHub du poste,
+  donc sur les vraies données de cairn-wms — ses 21 modules, ses tickets, son journal — et une
+  session forgée. Huit captures, accueil et `docs/flux-entrants/1.1-reception.md`, 1440 et
+  390 px, sombre et clair, compressées, **remplacent celles prises sur données fictives**. Leur
+  fil est vide : la base d'événements de la production n'est pas accessible depuis le poste, et
+  le conteneur d'épreuve part d'une base neuve — c'est l'état vide réel qu'elles montrent.
+  L'écran de connexion a été capturé sur la production elle-même, dans les deux thèmes.
+- `status.yml` : tranche 6b `livré`. Issue #23 close.
+
 ## Décisions
 
 Aucune fiche : aucune dépendance, aucun choix engageant. Tout ce qui suit relève de la règle 7 —
@@ -161,24 +179,24 @@ Aucune fiche : aucune dépendance, aucun choix engageant. Tout ce qui suit relè
 | `app/utils/temps.ts` | Créé. Dates, heures, semaine, durées, telles que les écrans les disent. |
 | `scripts/visuel/captures.mjs` | Tous les écrans, les deux vues du design. |
 | `scripts/dev/fictif.mjs` | Secret de session fourni par l'environnement, pour l'épreuve visuelle. |
-| `journal/captures/2026-09-18-tranche-6b/` | Huit captures : accueil et documentation, 1440 et 390 px, sombre et clair — sur données fictives, après les retouches. |
+| `journal/captures/2026-09-18-tranche-6b/` | Huit captures : accueil et documentation, 1440 et 390 px, sombre et clair — image de production sur les vraies données. |
+| `status.yml` | Tranche 6b `livré`. |
 
 ## Issues liées
 
-- `#23` — tranche 6b, engagée par cette session ; commentée.
+- `#23` — tranche 6b, engagée, livrée et close par cette session.
+- `#24` — la pull request, fusionnée par Lucas.
 
 ## Points ouverts
 
-- **La tranche n'est pas livrée.** Lucas a validé le rendu sur le poste ; il reste la pull request
-  vers `main` — décision humaine — et la mise en production.
 - **L'écran de connexion en thème clair** — carte sur fond sombre à côté du panneau clair — n'a pas
   encore été vu par Lucas.
-- **« Pas la même taille sur toutes les pages »** : la mesure ne montre aucune différence de
-  largeur ; si Lucas parlait de la hauteur, qui suit la page, la colonne peut être collée à
-  l'écran (toujours visible, à hauteur de fenêtre). Question posée.
-- **Les captures jointes sont prises sur les données fictives**, pas sur l'écran réel connecté que
-  la règle 7 exige pour livrer. Elles montrent la forme ; la preuve de livraison se refera sur la
-  production.
+- **« Pas la même taille sur toutes les pages »** : la mesure ne montrait aucune différence de
+  largeur ; Lucas s'est déclaré satisfait de la colonne proportionnelle. Si le sujet revient, il
+  s'agit sans doute de la hauteur, qui suit la page — une colonne collée à l'écran y répondrait.
+- **Les captures connectées viennent de l'image de production lancée sur le poste**, pas de la
+  production elle-même : son fil y est vide, faute d'accès à sa base. Une capture de la production
+  connectée exigerait une session ouverte par Lucas.
 - **Le fil en direct est désormais sur tous les écrans**, avec une connexion WebSocket unique : à
   constater en production, sur plusieurs onglets.
 - **Les groupes de la documentation sont dans l'ordre alphabétique des dossiers**, celui de l'arbre ;
