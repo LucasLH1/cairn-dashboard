@@ -77,7 +77,7 @@ tranches:
 
   - id: "6b"
     nom: Reproduction fidèle du design
-    etat: en développement
+    etat: livré
     issue: 23
     label: tranche/6b-refonte-design
 
