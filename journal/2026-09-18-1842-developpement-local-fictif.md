@@ -1,8 +1,8 @@
 ---
 date: 2026-09-18 18:42
 objectif: Pouvoir lancer le dashboard sur le poste, sur données fictives et sans secret à configurer, pour itérer sur le design sans passer par la production.
-tranches: []
-issues: [22]
+tranches: ["6b"]
+issues: [22, 23, 7]
 ---
 
 # Session du 2026-09-18 — développement local sur données fictives
@@ -106,6 +106,13 @@ Choix faits en réalisant, à relire :
 - **Le fil n'affiche pas d'heure** : amorcer par les routes (horodatage de réception « maintenant »)
   ne prive donc l'interface d'aucune donnée.
 
+Décidé par Lucas en fin de session :
+
+- **La refonte du design passe avant la tranche 7.** Elle devient la tranche **6b** (#23), insérée
+  dans `status.yml` avant la 7, avec son label `tranche/6b-refonte-design`. L'identifiant garde la
+  forme des autres (un chiffre, une lettre) sans renuméroter la 7 et la 8, que citent déjà leurs
+  issues, leurs labels, le cadrage et les fiches. À relire. Un commentaire sur #7 le signale.
+
 ## Fichiers touchés
 
 | Chemin | Ce qui change et pourquoi |
@@ -120,15 +127,18 @@ Choix faits en réalisant, à relire :
 | `scripts/ci/smoke` | L'image reçoit les adresses de développement et doit les ignorer. |
 | `test/faux-github.spec.ts` | Créé, 15 tests. |
 | `README.md`, `.env.example` | Mise en route sans configuration. |
+| `status.yml` | Tranche 6b ajoutée avant la 7, à faire. |
 
 ## Issues liées
 
 - `#22` — ouverte et fermée par cette session.
+- `#23` — ouverte : tranche 6b, refonte du design.
+- `#7` — commentée : la 6b passe avant.
 
 ## Points ouverts
 
-- **La refonte du design est-elle une tranche ?** La règle 6 veut une tranche à la fois, et la suivante
-  est la 7. Question posée à Lucas, sans réponse à ce stade.
+- **La nouvelle référence du design reste à fournir** : la tranche 6b commence par le nouvel export
+  dans `design/` (règle 7, `design/README.md`).
 - **Node 24 sur le poste, 22.23.2 dans l'image** : un écart de `node:sqlite` ne se verrait pas en
   local. Aligner le poste (nvm) reste à faire.
 - **Le faux ne suit l'API que pour les champs lus aujourd'hui.** Les tranches 7 et 8 devront y ajouter

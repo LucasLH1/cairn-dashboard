@@ -75,6 +75,12 @@ tranches:
     issue: 6
     label: tranche/6-hooks-claude-code
 
+  - id: "6b"
+    nom: Refonte du design
+    etat: à faire
+    issue: 23
+    label: tranche/6b-refonte-design
+
   - id: "7"
     nom: Connecteur MCP avec OAuth
     etat: à faire
